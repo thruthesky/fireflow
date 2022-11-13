@@ -9,5 +9,5 @@ export interface UserDocument {
   photo_url: string;
   gender: string;
   birth_date: admin.firestore.Timestamp;
-  blockList?: Array<DocumentReference>;
+  blockedUserList?: Array<DocumentReference>;
 }

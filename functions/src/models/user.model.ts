@@ -11,7 +11,7 @@ import { Ref } from "../utils/ref";
  */
 export class User {
   static publicDoc(
-    uid: string
+      uid: string
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return Ref.publicDoc(uid);
   }
@@ -33,9 +33,9 @@ export class User {
    *  await User.setSettings(userA, "abc", { "def": true });
    */
   static async setSettings(
-    uid: string,
-    docId: string,
-    data: {
+      uid: string,
+      docId: string,
+      data: {
       [key: string]: any;
     }
   ): Promise<admin.firestore.WriteResult> {
@@ -77,7 +77,7 @@ export class User {
   // }
 
   static async getUserByPhoneNumber(
-    phoneNumber: string
+      phoneNumber: string
   ): Promise<UserRecord | null> {
     try {
       const UserRecord = await Ref.auth.getUserByPhoneNumber(phoneNumber);
@@ -124,8 +124,8 @@ export class User {
    * @param otherUid is the user uid to be disabled.
    */
   static async disableUser(
-    adminUid: string,
-    otherUid: string
+      adminUid: string,
+      otherUid: string
   ): Promise<UserRecord> {
     this.checkAdmin(adminUid);
     const user = await Ref.auth.updateUser(otherUid, { disabled: true });
@@ -151,25 +151,25 @@ export class User {
    * @return promise of write result
    */
   static updatePublicData(
-    uid: string,
-    data: UserDocument
+      uid: string,
+      data: UserDocument
   ): Promise<admin.firestore.WriteResult> {
     delete data.email;
     delete data.phone_number;
-    delete data.blockList;
+    delete data.blockedUserList;
     return User.publicDoc(uid).set(
-      {
-        ...data,
-        userDocumentReference: Ref.userDoc(uid),
-        hasPhoto: !!data.photo_url,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
+        {
+          ...data,
+          userDocumentReference: Ref.userDoc(uid),
+          hasPhoto: !!data.photo_url,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
     );
   }
 
   static increaseNoOfPosts(
-    userDocumentReference: DocumentReference
+      userDocumentReference: DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return userDocumentReference.update({
       noOfPosts: admin.firestore.FieldValue.increment(1),
