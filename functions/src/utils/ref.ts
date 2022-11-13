@@ -31,7 +31,7 @@ export class Ref {
   }
 
   static get usersPublicDataCol() {
-    return this.db.collection("users_publi_data");
+    return this.db.collection("users_public_data");
   }
 
   // Returns user public data document path

@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-admin.firestore().settings({ignoreUndefinedProperties: true});
+admin.firestore().settings({ ignoreUndefinedProperties: true });
 
 export * from "./controllers/user.functions";
+export * from "./controllers/forum.functions";

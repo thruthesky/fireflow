@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { DocumentReference } from "firebase-admin/firestore";
 export interface UserDocument {
   uid: string;
   display_name: string;
@@ -8,4 +9,5 @@ export interface UserDocument {
   photo_url: string;
   gender: string;
   birth_date: admin.firestore.Timestamp;
+  blockList?: Array<DocumentReference>;
 }
