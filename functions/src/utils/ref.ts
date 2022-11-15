@@ -25,7 +25,7 @@ export class Ref {
   }
 
   static userDoc(
-    uid: string
+      uid: string
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return this.users.doc(uid);
   }
@@ -35,7 +35,7 @@ export class Ref {
   }
 
   static userSettingDoc(
-    uid: string
+      uid: string
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return this.userSettings.doc(uid);
   }
@@ -46,22 +46,18 @@ export class Ref {
 
   // Returns user public data document path
   static publicDoc(
-    uid: string
+      uid: string
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return this.usersPublicDataCol.doc(uid);
   }
 
   static userSettingsCol(uid: string): admin.firestore.CollectionReference {
-    return this.userDoc(uid).collection("user_settings");
-  }
-
-  static userSettingsGroupCol(): admin.firestore.CollectionGroup {
-    return this.db.collectionGroup("user_settings");
+    return this.db.collection("user_settings");
   }
 
   static userSettingsDoc(
-    uid: string,
-    docId = "settings"
+      uid: string,
+      docId = "settings"
   ): admin.firestore.DocumentReference {
     return this.userSettingsCol(uid).doc(docId);
   }
@@ -106,8 +102,8 @@ export class Ref {
     return this.userDoc(uid).collection("fcm_tokens");
   }
   static tokenDoc(
-    uid: string,
-    token: string
+      uid: string,
+      token: string
   ): admin.firestore.DocumentReference {
     return this.tokenCol(uid).doc(token);
   }
@@ -120,13 +116,13 @@ export class Ref {
 
   // Point history folder for post point events.
   static pointLastHistory(
-    uid: string,
-    eventName: string
+      uid: string,
+      eventName: string
   ): admin.firestore.Query<admin.firestore.DocumentData> {
     // console.log(this.pointHistoryCol(uid).path, eventName);
     return this.pointHistoryCol(uid)
-      .where("eventName", "==", eventName)
-      .orderBy("createdAt", "desc")
-      .limit(1);
+        .where("eventName", "==", eventName)
+        .orderBy("createdAt", "desc")
+        .limit(1);
   }
 }
