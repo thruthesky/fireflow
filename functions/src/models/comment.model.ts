@@ -1,5 +1,7 @@
-import { CommentDocument } from "../interfaces/forum.interface";
+import { CommentDocument, PostDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
+import { Utils } from "../utils/utils";
+import { Post } from "./post.model";
 
 export class Comment {
   static async get(id: string): Promise<CommentDocument | null> {
@@ -39,5 +41,29 @@ export class Comment {
     return [...new Set(uids)].filter((v) => v != authorUid) as string[];
   }
 
-  static async updateMeta() {}
+  /**
+   * 코멘트가 작성되면, 코멘트의 dpeth 와 order 를 업데이트하여, 트리 구조 목록과 들여쓰기를 할 수 있도록 한다.
+   *
+   * 참고, 글에 noOfComments 는 다른 곳에서 업데이트하고 있다.
+   *
+   * @param comment 코멘트 문서
+   * @param commentId 코멘트 문서 id
+   * @returns
+   */
+  static async updateMeta(comment: CommentDocument, commentId: string) {
+    const post = await Post.get(comment.postDocumentReference.id);
+    let parent;
+    if (comment.parentCommentReference) {
+      parent = await Comment.get(comment.parentCommentReference.id);
+    }
+    const order = Utils.commentOrder(
+      parent?.order,
+      parent?.depth,
+      post.noOfComments
+    );
+    return Ref.commentDoc(commentId).update({
+      depth: parent?.depth ? parent.depth + 1 : 1,
+      order: order,
+    });
+  }
 }
