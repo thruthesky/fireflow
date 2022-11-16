@@ -16,10 +16,10 @@ export class Setting {
    */
   static increaseNoOfUsers(): Promise<admin.firestore.WriteResult> {
     return this.counters.set(
-        {
-          noOfUsers: admin.firestore.FieldValue.increment(1),
-        },
-        {merge: true}
+      {
+        noOfUsers: admin.firestore.FieldValue.increment(1),
+      },
+      { merge: true }
     );
   }
 }

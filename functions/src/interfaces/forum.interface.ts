@@ -16,7 +16,7 @@ export interface CommentDocument {
   id: string;
   userDocumentReference: admin.firestore.DocumentReference;
   postDocumentReference: admin.firestore.DocumentReference;
-  commentParentDocumentReference: admin.firestore.DocumentReference;
+  parentCommentReference: admin.firestore.DocumentReference;
   createdAt: admin.firestore.Timestamp;
   content: string;
   files: string[];
