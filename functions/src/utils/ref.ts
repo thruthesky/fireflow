@@ -106,6 +106,10 @@ export class Ref {
     return this.chatRoomsCol.doc(docId);
   }
 
+  static get chatRoomMessagesCol() {
+    return this.db.collection("chat_room_messages");
+  }
+
   /** ****************************** MESSAGING References ****************************/
 
   static tokenCol(uid: string): admin.firestore.CollectionReference {
