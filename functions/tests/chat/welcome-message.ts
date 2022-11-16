@@ -1,22 +1,19 @@
 import "mocha";
 import { expect } from "chai";
+import { Chat } from "../../src/models/chat.model";
 
-import * as admin from "firebase-admin";
-
+import "../firebase.init";
 import { Setting } from "../../src/models/setting.model";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      "../keys/withcenter-kmeet-firebase-adminsdk.json"
-    ),
-  });
-}
+describe("Chat - welcome message", () => {
+  it("Send welcome message", async () => {
+    const re = await Chat.sendWelcomeMessage("9SIE4SCvLdOID7KICjwoou6k0yj2");
+    expect(re).to.be.a("string");
 
-describe("Get system settings", () => {
-  it("Get system settings", async () => {
-    const size = await Setting.getSystemSettings();
-    console.log(size);
-    expect(size).to.be.an("object");
+    const room = await Chat.getRoom(re ?? "");
+    expect(room).to.be.an("object");
+
+    const system = await Setting.getSystemSettings();
+    expect(system.welcomeMessage).equals(room.last_message);
   });
 });
