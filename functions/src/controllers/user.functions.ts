@@ -12,12 +12,8 @@ export const onUserCreate = functions
     futures.push(
       Setting.increaseNoOfUsers(),
       User.updatePublicData(context.params.uid, snap.data() as UserDocument),
-<<<<<<< HEAD
-      UserSetting.create(context.params.uid, "settings")
-=======
       UserSetting.create(context.params.uid, "settings"),
       Chat.sendWelcomeMessage(context.params.uid)
->>>>>>> 61f90463043bc1390be98a0f145713753823cacd
     );
     return Promise.all(futures);
   });
