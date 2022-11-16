@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { SystemDocument } from "../interfaces/setting.interface";
 
 /**
  * User class
@@ -19,7 +20,16 @@ export class Setting {
         {
           noOfUsers: admin.firestore.FieldValue.increment(1),
         },
-        {merge: true}
+        { merge: true }
     );
+  }
+
+  static async getSystemSettings(): Promise<SystemDocument> {
+    const data = await admin
+        .firestore()
+        .collection("settings")
+        .doc("system")
+        .get();
+    return data.data() as SystemDocument;
   }
 }
