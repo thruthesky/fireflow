@@ -1,10 +1,29 @@
 import * as admin from "firebase-admin";
-import { DocumentReference } from "firebase-admin/firestore";
 export interface PostDocument {
-  userDocumentReference: DocumentReference;
+  id: string;
   category: string;
-  title: string;
-  content: string;
+  userDocumentReference: admin.firestore.DocumentReference;
   createdAt: admin.firestore.Timestamp;
-  files: Array<string>;
+  title: string;
+  content?: string;
+  files: string[];
+  noOfComments: number;
+  likes: admin.firestore.DocumentReference[];
+  noOfLikes: number;
 }
+
+export interface CommentDocument {
+  id: string;
+  userDocumentReference: admin.firestore.DocumentReference;
+  postDocumentReference: admin.firestore.DocumentReference;
+  commentParentDocumentReference: admin.firestore.DocumentReference;
+  createdAt: admin.firestore.Timestamp;
+  content: string;
+  files: string[];
+  order: string;
+  depth: number;
+  likes: admin.firestore.DocumentReference[];
+  noOfLikes: number;
+}
+
+

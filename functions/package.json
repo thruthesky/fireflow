@@ -16,7 +16,8 @@
   "main": "lib/index.js",
   "dependencies": {
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^4.0.2"
+    "firebase-functions": "^4.0.2",
+    "dayjs": "^1.11.3"
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",

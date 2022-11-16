@@ -11,3 +11,13 @@ export interface UserDocument {
   birth_date: admin.firestore.Timestamp;
   blockedUserList?: Array<DocumentReference>;
 }
+
+
+
+
+ export interface UserSettingsDocument {
+  action: string;
+  category: string;
+  type?: string;
+  userDocumentReference: admin.firestore.DocumentReference;
+ }
