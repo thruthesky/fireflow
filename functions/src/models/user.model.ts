@@ -22,26 +22,6 @@ export class User {
     return snapshot.data() as UserDocument;
   }
 
-  /**
-   * Save settings
-   * @param uid uid of user
-   * @param docId key of the settings
-   * @param data data of the settings
-   * @return void
-   *
-   * @example
-   *  await User.setSettings(userA, "abc", { "def": true });
-   */
-  static async setSettings(
-      uid: string,
-      docId: string,
-      data: {
-      [key: string]: any;
-    }
-  ): Promise<admin.firestore.WriteResult> {
-    return Ref.userSettingsDoc(uid, docId).set(data, { merge: true });
-  }
-
   // / Returns user's point. 0 if it's not exists.
   static async point(uid: string): Promise<number> {
     const data = (

@@ -8,7 +8,7 @@ import { ChatMessageDocument } from "../interfaces/chat.interface";
 export const onChatMessageCreate = functions
     .region("asia-northeast3")
     .firestore.document("/chat_room_messages/{documentId}")
-    .onCreate((snap, context) => {
+    .onCreate((snap) => {
       const futures = [];
       futures.push(Chat.updateRoom(snap.data() as ChatMessageDocument));
       return Promise.all(futures);
