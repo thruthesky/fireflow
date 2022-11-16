@@ -1,4 +1,3 @@
-
 import { CommentDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
 
@@ -20,10 +19,16 @@ export class Comment {
    * @param authorUid the user uid of the comment id. If it is set, then the anotherUid will not be included in the result uid array. It should be the author uid of the commentId. But It can be any uid.
    * @returns Returns the uid of ancestors.
    */
-  static async getAncestorsUid(commentId: string, authorUid?: string): Promise<string[]> {
+  static async getAncestorsUid(
+    commentId: string,
+    authorUid?: string
+  ): Promise<string[]> {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
-    while (comment?.parentCommentReference && comment.postDocumentReference.id != comment.parentCommentReference.id) {
+    while (
+      comment?.parentCommentReference &&
+      comment.postDocumentReference.id != comment.parentCommentReference.id
+    ) {
       comment = await Comment.get(comment!.parentCommentReference.id);
       if (comment == null) break;
       uids.push(comment?.userDocumentReference.id);
@@ -33,4 +38,6 @@ export class Comment {
     // remove duplicates and remove authorUid
     return [...new Set(uids)].filter((v) => v != authorUid) as string[];
   }
+
+  static async updateMeta() {}
 }

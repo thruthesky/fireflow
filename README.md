@@ -1,8 +1,7 @@
 # Fireflow
 
 * 플러터플로를 통해 앱을 제작하는 경우, 백엔드로서 역할을 한다.
-* 플러터플로의 치명적인 단점은 debug run 과 instant reload 가 매우 느리다는 것이다. 그래서 개발이 원활하지 않다. 가능한 많은 작업을 백엔드에서 하여 프론트엔드의 개발 시간을 줄인다.
-
+* 플러터플로의 치명적인 단점은 debug run 과 instant reload 가 매우 느리다는 것이다. 그래서 개발이 원활하지 않다. 그래서 가능한 많은 작업을 백엔드에서 해서, 프론트엔드의 복잡도를 낮추고 이로 인해 개발 시간을 단축시킬 수 있도록 한다.
 
 # TODO
 
@@ -24,7 +23,7 @@
 - `/settings` 에 앱/시스템 자체의 설정이다. 참고, 관리자 지정, 헬퍼 지정
 - `/user_settings` 에 각 사용자별 설정을 저장한다.
 
-# 앱 설정
+# 시스템 설정
 
 - `/settings/system` 에는 시스템 설정을 지정한다. 주로 앱 버전, 헬퍼 사용자 지정 등을 할 수 있다.
 - `/settings/counters` 에는 각 종 카운터가 기록된다.
@@ -93,4 +92,26 @@
 
 - `/settings/system { helperUid: ..., welcomeMessage: ... }` 두 개의 필드가 존재하면, 새로 가입하는 사용자에게 환영 인사를 채팅으로 보낸다. 따라서 회원 가입하자 마자 (처음 사용하는 사용자에게) 새로운 채팅 메시지가 한 개 도착해 있게 된다.
 
+
+
+# 게시판
+
+- 글을 작성하면 사용자 문서의 `noOfPosts` 에 1 증가하고, (해당 글) 카테고리의 `noOfPosts` 에 1 증가하고, `/settings/counter {noOfPosts: ... }` 에 1 증가한다.
+- 코멘트를 작성하면 사용자 문서의 `noOfComments` 에 1 증가하고, (해당 코멘트) 카테고리의 `noOfComments` 에 1 증가하고, `/settings/counter {noOfComments: ... }` 에 1 증가한다.
+  - 또한, 그 코멘트의 글(최 상위 글)의 `noOfComments` 에 1 증가한다.
+
+
+## 카테고리
+
+- 게시판에 글을 쓸 때에는 반드시 카테고리가 존재해야지만 글을 쓸 수 가 있다.
+- 글(`noOfPosts`) 또는 코멘트(`noOfComments`)가 작성 될 때 마다 카운터가 1씩 증가한다.
+
+
+## 글
+
+## 코멘트
+
+- 코멘트를 작성 할 때에는 `userDocumentReference`, `postDocumentReference`, `parentCommentDocumentReference` 와 같이 세 개의 레퍼런스가 들어가야 한다.
+  - 특히, `parentCommentDocumentReference` 는 상위 코멘트 정보를 추적 할 때 사용된다. (푸시 알림 등에서 사용)
+  - 코멘트를 작성하면, 자동으로 `depth` 와 `order` 가 추가 된다.
 

@@ -183,4 +183,12 @@ export class User {
       noOfPosts: admin.firestore.FieldValue.increment(1),
     });
   }
+
+  static increaseNoOfComments(
+      userDocumentReference: DocumentReference
+  ): Promise<admin.firestore.WriteResult> {
+    return userDocumentReference.update({
+      noOfComments: admin.firestore.FieldValue.increment(1),
+    });
+  }
 }
