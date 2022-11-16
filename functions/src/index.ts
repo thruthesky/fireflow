@@ -6,3 +6,4 @@ admin.firestore().settings({ ignoreUndefinedProperties: true });
 
 export * from "./controllers/user.functions";
 export * from "./controllers/forum.functions";
+export * from "./controllers/chat.functions";

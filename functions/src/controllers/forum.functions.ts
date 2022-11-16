@@ -2,8 +2,9 @@ import * as functions from "firebase-functions";
 import { User } from "../models/user.model";
 import { PostDocument } from "../interfaces/forum.interface";
 
-export const onPostCreate = functions.firestore
-    .document("/posts/{uid}")
+export const onPostCreate = functions
+    .region("asia-northeast3")
+    .firestore.document("/posts/{uid}")
     .onCreate((snap, context) => {
       const futures = [];
 
