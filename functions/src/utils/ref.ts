@@ -96,6 +96,16 @@ export class Ref {
     return this.commentCol.doc(commentId);
   }
 
+  static get chatRoomsCol() {
+    return this.db.collection("chat_rooms");
+  }
+
+  static chatRoomsDoc(
+      docId: string
+  ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
+    return this.chatRoomsCol.doc(docId);
+  }
+
   /** ****************************** MESSAGING References ****************************/
 
   static tokenCol(uid: string): admin.firestore.CollectionReference {
