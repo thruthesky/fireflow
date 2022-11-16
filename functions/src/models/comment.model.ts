@@ -23,8 +23,8 @@ export class Comment {
   static async getAncestorsUid(commentId: string, authorUid?: string): Promise<string[]> {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
-    while (comment?.commentParentDocumentReference.id && comment.postDocumentReference.id != comment.commentParentDocumentReference.id) {
-      comment = await Comment.get(comment!.commentParentDocumentReference.id);
+    while (comment?.parentCommentReference && comment.postDocumentReference.id != comment.parentCommentReference.id) {
+      comment = await Comment.get(comment!.parentCommentReference.id);
       if (comment == null) break;
       uids.push(comment?.userDocumentReference.id);
     }

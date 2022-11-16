@@ -18,18 +18,18 @@ export const messagingOnPostCreate = functions
         data.action = EventName.postCreate;
         data.type = EventType.post;
         return Messaging.sendMessage(data);
-});
+    });
 
 export const messagingOnCommentCreate = functions
     .region("asia-northeast3")
     .firestore.document("/comments/{commentId}")
     .onCreate((snapshot) => {
-    const data = snapshot.data();
-    data.id = snapshot.id;
-    data.action = EventName.commentCreate;
-    data.type = EventType.post;
-    return Messaging.sendMessage(data);
-});
+        const data = snapshot.data();
+        data.id = snapshot.id;
+        data.action = EventName.commentCreate;
+        data.type = EventType.post;
+        return Messaging.sendMessage(data);
+    });
 
 
 export const pushNotificationQueue = functions
@@ -44,7 +44,7 @@ export const pushNotificationQueue = functions
             .collection("push-notifications-queue")
             .doc(snapshot.id)
             .update({
-            ...re,
-            sentAt: admin.firestore.FieldValue.serverTimestamp(),
+                ...re,
+                sentAt: admin.firestore.FieldValue.serverTimestamp(),
             });
-});
+    });
