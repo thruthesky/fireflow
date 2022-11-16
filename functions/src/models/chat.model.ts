@@ -20,19 +20,19 @@ export class Chat {
    * Save settings
    */
   static async updateRoom(
-    data: ChatMessageDocument
+      data: ChatMessageDocument
   ): Promise<admin.firestore.WriteResult> {
     const arr = data.chatRoomId.split("-");
     return Ref.chatRoomsDoc(data.chatRoomId).set(
-      {
-        chatRoomId: data.chatRoomId,
-        last_message: data.text,
-        last_message_timestamp: data.timestamp,
-        last_message_sent_by: data.senderUserDocumentReference,
-        last_message_seen_by: [data.senderUserDocumentReference],
-        users: [Ref.userDoc(arr[0]), Ref.userDoc(arr[1])],
-      },
-      { merge: true }
+        {
+          chatRoomId: data.chatRoomId,
+          last_message: data.text,
+          last_message_timestamp: data.timestamp,
+          last_message_sent_by: data.senderUserDocumentReference,
+          last_message_seen_by: [data.senderUserDocumentReference],
+          users: [Ref.userDoc(arr[0]), Ref.userDoc(arr[1])],
+        },
+        { merge: true }
     );
   }
 

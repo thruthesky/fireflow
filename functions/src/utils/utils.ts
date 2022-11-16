@@ -90,7 +90,7 @@ export class Utils {
       quot: "\"",
       bull: "•",
     };
-    return text.replace(/&([^;]+);/gm, function (match, entity) {
+    return text.replace(/&([^;]+);/gm, function(match, entity) {
       return entities[entity] || match;
     });
   }

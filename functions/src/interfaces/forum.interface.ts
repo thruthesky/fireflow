@@ -26,4 +26,10 @@ export interface CommentDocument {
   noOfLikes: number;
 }
 
-
+export interface CategoryDocument {
+  id: string;
+  category: string;
+  title: string;
+  noOfPosts: number;
+  noOfComments: number;
+}

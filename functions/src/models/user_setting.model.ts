@@ -19,8 +19,8 @@ export class UserSetting {
    * @param uid uid of user
    */
   static async create(
-    uid: string,
-    type: string
+      uid: string,
+      type: string
   ): Promise<admin.firestore.WriteResult> {
     return Ref.userSettings.doc().set({
       type: type,

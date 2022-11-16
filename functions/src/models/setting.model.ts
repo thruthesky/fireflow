@@ -17,19 +17,31 @@ export class Setting {
    */
   static increaseNoOfUsers(): Promise<admin.firestore.WriteResult> {
     return this.counters.set(
-      {
-        noOfUsers: admin.firestore.FieldValue.increment(1),
-      },
-      { merge: true }
+        {
+          noOfUsers: admin.firestore.FieldValue.increment(1),
+        },
+        { merge: true }
+    );
+  }
+  /**
+   * update noOfPosts field in the document of /settings/counters in firestore
+   * @return promise of write result
+   */
+  static increaseNoOfPosts(): Promise<admin.firestore.WriteResult> {
+    return this.counters.set(
+        {
+          noOfPosts: admin.firestore.FieldValue.increment(1),
+        },
+        { merge: true }
     );
   }
 
   static async getSystemSettings(): Promise<SystemDocument> {
     const data = await admin
-      .firestore()
-      .collection("settings")
-      .doc("system")
-      .get();
+        .firestore()
+        .collection("settings")
+        .doc("system")
+        .get();
     return data.data() as SystemDocument;
   }
 }

@@ -13,8 +13,6 @@ export interface UserDocument {
 }
 
 
-
-
 export interface UserSettingsDocument {
   action: string;
   category: string;

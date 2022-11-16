@@ -18,5 +18,4 @@ export class Post {
     data.id = id;
     return data;
   }
-
 }
