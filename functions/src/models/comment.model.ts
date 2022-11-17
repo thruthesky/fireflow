@@ -22,8 +22,8 @@ export class Comment {
    * @returns Returns the uid of ancestors.
    */
   static async getAncestorsUid(
-    commentId: string,
-    authorUid?: string
+      commentId: string,
+      authorUid?: string
   ): Promise<string[]> {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
@@ -58,9 +58,9 @@ export class Comment {
       parent = await Comment.get(comment.parentCommentDocumentReference.id);
     }
     const order = Utils.commentOrder(
-      parent?.order,
-      parent?.depth,
-      post.noOfComments
+        parent?.order,
+        parent?.depth,
+        post.noOfComments
     );
     return Ref.commentDoc(commentId).update({
       depth: parent?.depth ? parent.depth + 1 : 1,
