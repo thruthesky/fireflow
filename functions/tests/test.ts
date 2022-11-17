@@ -1,13 +1,11 @@
 import * as amdin from "firebase-admin";
-import { User } from "../src/classes/user";
+import { CommentDocument, PostDocument } from "../src/interfaces/forum.interface";
 import { UserDocument } from "../src/interfaces/user.interface";
-import { PostDocument } from "../src/interfaces/post.interface";
-import { CommentDocument } from "../src/interfaces/comment.interface";
-import { Comment } from "../src/classes/comment";
-
+import { Comment } from "../src/models/comment.model";
+import { Post } from "../src/models/post.model";
+import { User } from "../src/models/user.model";
 import { Ref } from "../src/utils/ref";
 
-import { Post } from "../src/classes/post";
 
 export class Test {
   static testCount = 0;
@@ -62,10 +60,10 @@ export class Test {
       const user = await User.create("test" + Test.id(), {
         createdAt: amdin.firestore.FieldValue.serverTimestamp(),
       });
-      uid = user!.id;
+      uid = user!.uid;
     }
     const postRef = await Ref.postCol.add({
-      uid: uid,
+      userDocumentReference: Ref.userDoc(uid),
       category: category ?? "qna",
       createdAt: amdin.firestore.FieldValue.serverTimestamp(),
       ...data,
@@ -106,10 +104,10 @@ export class Test {
       const user = await User.create("test" + Test.id(), {
         createdAt: amdin.firestore.FieldValue.serverTimestamp(),
       });
-      uid = user!.id;
+      uid = user!.uid;
     }
     const postRef = await Ref.postCol.add({
-      uid: uid,
+      userDocumentReference: Ref.userDoc(uid),
       category: category ?? "qna",
       createdAt: amdin.firestore.FieldValue.serverTimestamp(),
       ...data,
@@ -117,8 +115,8 @@ export class Test {
     const post = await Post.get(postRef.id);
 
     const ref = await Ref.commentCol.add({
-      uid: uid,
-      postId: post.id,
+      userDocumentReference: Ref.userDoc(uid),
+      postDocumentReference: Ref.postDoc(post.id),
       createdAt: amdin.firestore.FieldValue.serverTimestamp(),
       ...data,
     });
