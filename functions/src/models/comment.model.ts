@@ -28,10 +28,11 @@ export class Comment {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
     while (
-      comment?.parentCommentReference &&
-      comment.postDocumentReference.id != comment.parentCommentReference.id
+      comment?.parentCommentDocumentReference &&
+      comment.postDocumentReference.id !=
+        comment.parentCommentDocumentReference.id
     ) {
-      comment = await Comment.get(comment!.parentCommentReference.id);
+      comment = await Comment.get(comment!.parentCommentDocumentReference.id);
       if (comment == null) break;
       uids.push(comment?.userDocumentReference.id);
     }
@@ -53,8 +54,8 @@ export class Comment {
   static async updateMeta(comment: CommentDocument, commentId: string) {
     const post = await Post.get(comment.postDocumentReference.id);
     let parent;
-    if (comment.parentCommentReference) {
-      parent = await Comment.get(comment.parentCommentReference.id);
+    if (comment.parentCommentDocumentReference) {
+      parent = await Comment.get(comment.parentCommentDocumentReference.id);
     }
     const order = Utils.commentOrder(
         parent?.order,
