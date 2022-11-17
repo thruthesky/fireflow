@@ -26,4 +26,19 @@ export class Post {
       noOfComments: admin.firestore.FieldValue.increment(1),
     });
   }
+
+  /**
+   * 글 작성 후 이 함수를 호출하면 된다. 그러면 필요한 추가적인 정보를 업데이트한다.
+   * @param snapshot 글 snapshot
+   * @param uid 회원 uid
+   * @returns WriteResult
+   */
+  static updateMeta(
+      snapshot: admin.firestore.QueryDocumentSnapshot
+  ): Promise<admin.firestore.WriteResult> {
+    const createdAt = admin.firestore.FieldValue.serverTimestamp();
+    return snapshot.ref.update({
+      createdAt,
+    });
+  }
 }
