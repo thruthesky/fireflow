@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import { CategoryDocument } from "../interfaces/forum.interface";
+import { CategoryDocument, PostDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
 
 export class Category {
@@ -29,5 +29,22 @@ export class Category {
     return Ref.categoryDoc(cat.id).update({
       noOfPosts: admin.firestore.FieldValue.increment(1),
     });
+  }
+
+  static async increaseNoOfComments(
+      categoryId: string
+  ): Promise<admin.firestore.WriteResult | null> {
+    const cat = await this.get(categoryId);
+    if (cat == null) return null;
+    return Ref.categoryDoc(cat.id).update({
+      noOfComments: admin.firestore.FieldValue.increment(1),
+    });
+  }
+
+  static async increaseNoOfCommentsFromPostDocumentReference(
+      postDocumentReference: admin.firestore.DocumentReference
+  ) {
+    const post = (await postDocumentReference.get()).data() as PostDocument;
+    return this.increaseNoOfComments(post.category);
   }
 }

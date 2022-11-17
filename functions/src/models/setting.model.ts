@@ -36,6 +36,15 @@ export class Setting {
     );
   }
 
+  static increaseNoOfComments(): Promise<admin.firestore.WriteResult> {
+    return this.counters.set(
+        {
+          noOfComments: admin.firestore.FieldValue.increment(1),
+        },
+        { merge: true }
+    );
+  }
+
   static async getSystemSettings(): Promise<SystemDocument> {
     const data = await admin
         .firestore()

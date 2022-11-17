@@ -51,15 +51,12 @@ export class Ref {
     return this.usersPublicDataCol.doc(uid);
   }
 
-  static userSettingsCol(uid: string): admin.firestore.CollectionReference {
+  static get userSettingsCol(): admin.firestore.CollectionReference {
     return this.db.collection("user_settings");
   }
 
-  static userSettingsDoc(
-      uid: string,
-      docId = "settings"
-  ): admin.firestore.DocumentReference {
-    return this.userSettingsCol(uid).doc(docId);
+  static userSettingsDoc(uid: string): admin.firestore.DocumentReference {
+    return this.userSettingsCol.doc(uid);
   }
 
   static get categoryCol() {

@@ -1,6 +1,7 @@
-
 import { CommentDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
+import { Utils } from "../utils/utils";
+import { Post } from "./post.model";
 
 export class Comment {
   static async get(id: string): Promise<CommentDocument | null> {
@@ -20,10 +21,16 @@ export class Comment {
    * @param authorUid the user uid of the comment id. If it is set, then the anotherUid will not be included in the result uid array. It should be the author uid of the commentId. But It can be any uid.
    * @returns Returns the uid of ancestors.
    */
-  static async getAncestorsUid(commentId: string, authorUid?: string): Promise<string[]> {
+  static async getAncestorsUid(
+      commentId: string,
+      authorUid?: string
+  ): Promise<string[]> {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
-    while (comment?.parentCommentReference && comment.postDocumentReference.id != comment.parentCommentReference.id) {
+    while (
+      comment?.parentCommentReference &&
+      comment.postDocumentReference.id != comment.parentCommentReference.id
+    ) {
       comment = await Comment.get(comment!.parentCommentReference.id);
       if (comment == null) break;
       uids.push(comment?.userDocumentReference.id);
@@ -32,5 +39,31 @@ export class Comment {
 
     // remove duplicates and remove authorUid
     return [...new Set(uids)].filter((v) => v != authorUid) as string[];
+  }
+
+  /**
+   * 코멘트가 작성되면, 코멘트의 dpeth 와 order 를 업데이트하여, 트리 구조 목록과 들여쓰기를 할 수 있도록 한다.
+   *
+   * 참고, 글에 noOfComments 는 다른 곳에서 업데이트하고 있다.
+   *
+   * @param comment 코멘트 문서
+   * @param commentId 코멘트 문서 id
+   * @returns
+   */
+  static async updateMeta(comment: CommentDocument, commentId: string) {
+    const post = await Post.get(comment.postDocumentReference.id);
+    let parent;
+    if (comment.parentCommentReference) {
+      parent = await Comment.get(comment.parentCommentReference.id);
+    }
+    const order = Utils.commentOrder(
+        parent?.order,
+        parent?.depth,
+        post.noOfComments
+    );
+    return Ref.commentDoc(commentId).update({
+      depth: parent?.depth ? parent.depth + 1 : 1,
+      order: order,
+    });
   }
 }
