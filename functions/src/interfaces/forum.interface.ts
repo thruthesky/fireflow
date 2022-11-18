@@ -10,6 +10,7 @@ export interface PostDocument {
   noOfComments: number;
   likes: admin.firestore.DocumentReference[];
   noOfLikes: number;
+  deleted?: boolean;
 }
 
 export interface CommentDocument {

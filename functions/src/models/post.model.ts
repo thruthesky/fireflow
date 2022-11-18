@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+
 import { PostDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
 
@@ -20,7 +21,7 @@ export class Post {
   }
 
   static increaseNoOfComments(
-      postDocumentReference: admin.firestore.DocumentReference
+    postDocumentReference: admin.firestore.DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return postDocumentReference.update({
       noOfComments: admin.firestore.FieldValue.increment(1),
@@ -34,11 +35,45 @@ export class Post {
    * @returns WriteResult
    */
   static updateMeta(
-      snapshot: admin.firestore.QueryDocumentSnapshot
+    snapshot: admin.firestore.QueryDocumentSnapshot
   ): Promise<admin.firestore.WriteResult> {
     const createdAt = admin.firestore.FieldValue.serverTimestamp();
     return snapshot.ref.update({
       createdAt,
     });
+  }
+  /**
+   * 만약, 글이 삭제되었으면, noOfComment 가 0 이면, 문서 삭제. 아니면 내용 삭제.
+   * @param after 글 after snapshot
+   */
+  static checkDelete(
+    after: admin.firestore.QueryDocumentSnapshot
+  ): Promise<admin.firestore.WriteResult> | null {
+    const data = after.data() as PostDocument;
+    if (data.deleted) {
+      if (!data.noOfComments || data.noOfComments == 0) {
+        return after.ref.delete();
+      } else {
+        if (data.files && data.files.length > 0) {
+          // delete files in firebase storage from data.files array
+          // 여기서 부터... 파일 삭제 확인.
+          // @TODO 테스트를 추가해서 확인 할 것.
+          for (const url of data.files) {
+            const token = url.split("?");
+            const parts = token[0].split("/");
+            const path = parts[parts.length - 1].replace(/%2F/gi, "/");
+            const fileRef = admin.storage().bucket().file(path);
+            fileRef.delete();
+          }
+        }
+        return after.ref.update({
+          title: "",
+          content: "",
+          files: [],
+        });
+      }
+    } else {
+      return null;
+    }
   }
 }

@@ -21,6 +21,16 @@ export const onPostCreate = functions
     return Promise.all(futures);
   });
 
+export const onPostUpdate = functions
+  .region("asia-northeast3")
+  .firestore.document("/posts/{postId}")
+  .onUpdate((snap) => {
+    const futures = [];
+    const after = snap.after;
+    futures.push(Post.checkDelete(after));
+    return Promise.all(futures);
+  });
+
 export const onCommentCreate = functions
   .region("asia-northeast3")
   .firestore.document("/comments/{commentId}")
