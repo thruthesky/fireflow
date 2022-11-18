@@ -61,10 +61,10 @@ export class Library {
       lt: "<",
       gt: ">",
       nbsp: " ",
-      quot: '"',
+      quot: "\"",
       bull: "•",
     };
-    return text.replace(/&([^;]+);/gm, function (match, entity) {
+    return text.replace(/&([^;]+);/gm, function(match, entity) {
       return entities[entity] || match;
     });
   }
@@ -85,9 +85,9 @@ export class Library {
   }
 
   static commentOrder(
-    order?: string,
-    depth?: number,
-    noOfComments?: number
+      order?: string,
+      depth?: number,
+      noOfComments?: number
   ): string {
     // / 코멘트 트리 구조를 표현하기 위한 정렬 문자열 생성
     // /

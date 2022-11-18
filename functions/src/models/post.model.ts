@@ -21,7 +21,7 @@ export class Post {
   }
 
   static increaseNoOfComments(
-    postDocumentReference: admin.firestore.DocumentReference
+      postDocumentReference: admin.firestore.DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return postDocumentReference.update({
       noOfComments: admin.firestore.FieldValue.increment(1),
@@ -35,7 +35,7 @@ export class Post {
    * @returns WriteResult
    */
   static updateMeta(
-    snapshot: admin.firestore.QueryDocumentSnapshot
+      snapshot: admin.firestore.QueryDocumentSnapshot
   ): Promise<admin.firestore.WriteResult> {
     const createdAt = admin.firestore.FieldValue.serverTimestamp();
     return snapshot.ref.update({
@@ -47,7 +47,7 @@ export class Post {
    * @param after 글 after snapshot
    */
   static async checkDelete(
-    after: admin.firestore.QueryDocumentSnapshot
+      after: admin.firestore.QueryDocumentSnapshot
   ): Promise<admin.firestore.WriteResult | null> {
     const data = after.data() as PostDocument;
     if (data.deleted) {
@@ -57,14 +57,12 @@ export class Post {
       } else {
         if (data.files && data.files.length > 0) {
           // delete files in firebase storage from data.files array
-          // 여기서 부터... 파일 삭제 확인.
-          // @TODO 테스트를 추가해서 확인 할 것.
           for (const url of data.files) {
-            console.log("deleting url: ", url);
+            // console.log("deleting url: ", url);
             const token = url.split("?");
             const parts = token[0].split("/");
             const path = parts[parts.length - 1].replace(/%2F/gi, "/");
-            console.log("path: ", path);
+            // console.log("path: ", path);
             const fileRef = admin.storage().bucket().file(path);
             await fileRef.delete();
           }
