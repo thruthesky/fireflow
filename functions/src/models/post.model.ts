@@ -46,9 +46,9 @@ export class Post {
    * 만약, 글이 삭제되었으면, noOfComment 가 0 이면, 문서 삭제. 아니면 내용 삭제.
    * @param after 글 after snapshot
    */
-  static checkDelete(
+  static async checkDelete(
     after: admin.firestore.QueryDocumentSnapshot
-  ): Promise<admin.firestore.WriteResult> | null {
+  ): Promise<admin.firestore.WriteResult | null> {
     const data = after.data() as PostDocument;
     if (data.deleted) {
       console.log("--> post deleted. going to delete the document");
@@ -60,11 +60,13 @@ export class Post {
           // 여기서 부터... 파일 삭제 확인.
           // @TODO 테스트를 추가해서 확인 할 것.
           for (const url of data.files) {
+            console.log("deleting url: ", url);
             const token = url.split("?");
             const parts = token[0].split("/");
             const path = parts[parts.length - 1].replace(/%2F/gi, "/");
+            console.log("path: ", path);
             const fileRef = admin.storage().bucket().file(path);
-            fileRef.delete();
+            await fileRef.delete();
           }
         }
         return after.ref.update({
