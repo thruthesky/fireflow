@@ -48,3 +48,13 @@ export const onCommentCreate = functions
       );
       return Promise.all(futures);
     });
+
+export const onCommentUpdate = functions
+    .region("asia-northeast3")
+    .firestore.document("/comments/{commentId}")
+    .onUpdate((snap) => {
+      const futures = [];
+      const after = snap.after;
+      futures.push(Comment.checkDelete(after));
+      return Promise.all(futures);
+    });
