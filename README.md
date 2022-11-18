@@ -17,6 +17,7 @@
 - [Fireflow](#fireflow)
 - [TODO](#todo)
 - [개요](#개요)
+- [기능](#기능)
 - [Firestore DB 구조](#firestore-db-구조)
 - [시스템 설정](#시스템-설정)
   - [관리자 지정](#관리자-지정)
@@ -47,6 +48,11 @@
   * Cloud function 의 Firestore background functions 에서는 `context.auth` 를 사용 할 수 없다. 그래서 항상 userDocumentReference 에서 글 쓴이 문서 ref 를 전달해 주어야 한다.
   * 또한 백엔드에서 업데이트하는 데이터(필드)는 한박자 늦을 수 있다. 그래서 `createdAt` 과 같이, 목록에서 정렬할 때 사용되는 변수는 처음 저장 할 때, 같이 저장 해 주어야 한다. (그렇지 않으면 목록에 바로 나오지 않을 수 있다.)
 
+
+# 기능
+
+- 회원 가입시 `users_public_data` 생성 및 회원 업데이트 할 때 마다 동기화. 이 문서에는 개인 정보를 뺀 나머지 정보만 저장되므로, 외부 공개용으로 사용.
+- 회원 가입시, 환영 인사 채팅 메시지 전송.
 
 
 # Firestore DB 구조

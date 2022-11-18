@@ -83,11 +83,7 @@ export class Comment {
       if (data.files && data.files.length > 0) {
         // delete files in firebase storage from data.files array
         for (const url of data.files) {
-          // console.log("deleting url: ", url);
-          const token = url.split("?");
-          const parts = token[0].split("/");
-          const path = parts[parts.length - 1].replace(/%2F/gi, "/");
-          // console.log("path: ", path);
+          const path = Library.getPathFromUrl(url);
           const fileRef = admin.storage().bucket().file(path);
           await fileRef.delete();
         }

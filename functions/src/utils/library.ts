@@ -144,4 +144,18 @@ export class Library {
       return order;
     }
   }
+
+  /**
+   * Returns the file path in the storage from the given [url].
+   * @param url the URL of firebase storage image(or file)
+   * @returns the path of the image(or file) in firebase storage.
+   */
+  static getPathFromUrl(url: string): string {
+    // console.log("deleting url: ", url);
+    const token = url.split("?");
+    const parts = token[0].split("/");
+    const path = parts[parts.length - 1].replace(/%2F/gi, "/");
+    // console.log("path: ", path);
+    return path;
+  }
 }
