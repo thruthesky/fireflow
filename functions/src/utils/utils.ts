@@ -1,33 +1,7 @@
-import dayjs = require("dayjs");
-// import { v4 as uuidv4 } from "uuid";
-
 /**
  * @file utils.ts
  */
 export class Utils {
-  static getToday(): string {
-    return dayjs().format("YYYYMMDD");
-  }
-  static getTomorrow(): string {
-    return dayjs().add(1, "day").format("YYYYMMDD");
-  }
-  static getDays(n: number): string {
-    return dayjs().add(n, "days").format("YYYYMMDD");
-  }
-
-  static addLeadingZeros(num: number, len: number): string {
-    return String(num).padStart(len, "0");
-  }
-
-  /**
-   * Returns unix timestamp in seconds from 19...
-   *
-   * @return int unix timestamp
-   */
-  static getTimestamp() {
-    return Math.round(new Date().getTime() / 1000);
-  }
-
   /**
    *
    * @param min
@@ -87,10 +61,10 @@ export class Utils {
       lt: "<",
       gt: ">",
       nbsp: " ",
-      quot: "\"",
+      quot: '"',
       bull: "•",
     };
-    return text.replace(/&([^;]+);/gm, function(match, entity) {
+    return text.replace(/&([^;]+);/gm, function (match, entity) {
       return entities[entity] || match;
     });
   }
@@ -111,9 +85,9 @@ export class Utils {
   }
 
   static commentOrder(
-      order?: string,
-      depth?: number,
-      noOfComments?: number
+    order?: string,
+    depth?: number,
+    noOfComments?: number
   ): string {
     // / 코멘트 트리 구조를 표현하기 위한 정렬 문자열 생성
     // /

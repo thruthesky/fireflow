@@ -17,7 +17,6 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "dayjs": "^1.11.3",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.0.2"
   },
