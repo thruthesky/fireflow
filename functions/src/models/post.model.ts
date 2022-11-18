@@ -51,6 +51,7 @@ export class Post {
   ): Promise<admin.firestore.WriteResult> | null {
     const data = after.data() as PostDocument;
     if (data.deleted) {
+      console.log("--> post deleted. going to delete the document");
       if (!data.noOfComments || data.noOfComments == 0) {
         return after.ref.delete();
       } else {
@@ -73,6 +74,7 @@ export class Post {
         });
       }
     } else {
+      console.log("--> post not deleted.");
       return null;
     }
   }
