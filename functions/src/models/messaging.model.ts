@@ -1,27 +1,24 @@
 import * as admin from "firebase-admin";
 import { EventName, EventType } from "../utils/event-name";
 import { MessagePayload, SendMessage } from "../interfaces/messaging.interface";
-import { invalidArgument } from "../utils/library";
 import { Ref } from "../utils/ref";
-import { Utils } from "../utils/utils";
-
+import { Library } from "../utils/library";
 
 import { Comment } from "../models/comment.model";
 import { User } from "./user.model";
 import { Post } from "./post.model";
 import { UserSettingsDocument } from "../interfaces/user.interface";
 
-
 export class Messaging {
   /**
-     * Send push messages
-     *
-     * For forum category subscription, 'data.action' and 'data.category' has the information.
-     * For topics like `allUsers`, `webUsers`, `androidUsers`, `iosUsers` will follow on next version.
-     *
-     * @param data information of sending message
-     * @returns results
-     */
+   * Send push messages
+   *
+   * For forum category subscription, 'data.action' and 'data.category' has the information.
+   * For topics like `allUsers`, `webUsers`, `androidUsers`, `iosUsers` will follow on next version.
+   *
+   * @param data information of sending message
+   * @returns results
+   */
   static async sendMessage(data: any): Promise<any> {
     if (data.topic) {
       // / see TODO in README.md
@@ -33,18 +30,18 @@ export class Messaging {
     } else if (data.action) {
       return this.sendMessageByAction(data);
     } else {
-      throw invalidArgument("One of uids, tokens, topic must be present");
+      throw "One of uids, tokens, topic must be present";
     }
   }
 
   /**
-     *
-     * @param data
-     *  'action' can be one of 'post-create', 'comment-create',
-     *  'uid' is the uid of the user
-     *  'category' is the category of the post.
-     * @returns
-     */
+   *
+   * @param data
+   *  'action' can be one of 'post-create', 'comment-create',
+   *  'uid' is the uid of the user
+   *  'category' is the category of the post.
+   * @returns
+   */
   static async sendMessageByAction(data: any) {
     console.log(`sendMessageByAction(${JSON.stringify(data)})`);
 
@@ -65,10 +62,10 @@ export class Messaging {
     // Get users who subscribed the subscription
     // TODO make this a function.
     const snap = await Ref.db
-        .collection("user_settings")
-        .where("action", "==", data.action)
-        .where("category", "==", data.category)
-        .get();
+      .collection("user_settings")
+      .where("action", "==", data.action)
+      .where("category", "==", data.category)
+      .get();
 
     // console.log("snap.size", snap.size);
 
@@ -104,14 +101,14 @@ export class Messaging {
   }
 
   /**
-     * Send push notifications with the tokens and returns the result.
-     *
-     * @param tokens array of tokens.
-     * @param data data to send push notification.
-     */
+   * Send push notifications with the tokens and returns the result.
+   *
+   * @param tokens array of tokens.
+   * @param data data to send push notification.
+   */
   static async sendMessageToTokens(
-      tokens: string[],
-      data: any
+    tokens: string[],
+    data: any
   ): Promise<{ success: number; error: number }> {
     console.log(`sendMessageToTokens() token.length: ${tokens.length}`);
     if (tokens.length == 0) {
@@ -125,7 +122,7 @@ export class Messaging {
     const payload = this.completePayload(data);
 
     // sendMulticast() supports 500 tokens at a time. Chunk and send by batches.
-    const chunks = Utils.chunk(tokens, 500);
+    const chunks = Library.chunk(tokens, 500);
 
     console.log(`sendMessageToTokens() chunks.length: ${chunks.length}`);
 
@@ -133,9 +130,9 @@ export class Messaging {
     // Save [sendMulticast()] into a promise.
     for (const _500Tokens of chunks) {
       const newPayload: admin.messaging.MulticastMessage = Object.assign(
-          {},
-          { tokens: _500Tokens },
-                payload as any
+        {},
+        { tokens: _500Tokens },
+        payload as any
       );
       multicastPromise.push(admin.messaging().sendMulticast(newPayload));
     }
@@ -147,7 +144,11 @@ export class Messaging {
       // Send all the push messages in the promise with [Promise.allSettle].
       const settled = await Promise.allSettled(multicastPromise);
       // Returns are in array
-      for (let settledIndex = 0; settledIndex < settled.length; settledIndex++) {
+      for (
+        let settledIndex = 0;
+        settledIndex < settled.length;
+        settledIndex++
+      ) {
         const value = (settled[settledIndex] as any).value;
         successCount += value.successCount;
         failureCount += value.failureCount;
@@ -174,48 +175,51 @@ export class Messaging {
       console.log(`sendMessageToTokens() results: ${JSON.stringify(results)}`);
       return results;
     } catch (e) {
-      console.log("---> caught on sendMessageToTokens() await Promise.allSettled()", e);
+      console.log(
+        "---> caught on sendMessageToTokens() await Promise.allSettled()",
+        e
+      );
       throw e;
     }
   }
 
   /**
-     * Remove tokens from user token documents `/users/<uid>/fcm_tokens/<docId>`
-     *
-     * @param tokens tokens to remove
-     *
-     * Use this method to remove tokens that failed to be sent.
-     *
-     * Test, tests/messaging/remove-tokens.spec.ts
-     */
+   * Remove tokens from user token documents `/users/<uid>/fcm_tokens/<docId>`
+   *
+   * @param tokens tokens to remove
+   *
+   * Use this method to remove tokens that failed to be sent.
+   *
+   * Test, tests/messaging/remove-tokens.spec.ts
+   */
   static async removeTokens(tokens: string[]) {
     const promises: Promise<any>[] = [];
     for (const token of tokens) {
       promises.push(
-          // Get the document of the token
-          Ref.db
-              .collectionGroup("fcm_tokens")
-              .where("fcm_token", "==", token)
-              .get()
-              .then(async (snapshot) => {
-                for (const doc of snapshot.docs) {
-                  await doc.ref.delete();
-                }
-              })
+        // Get the document of the token
+        Ref.db
+          .collectionGroup("fcm_tokens")
+          .where("fcm_token", "==", token)
+          .get()
+          .then(async (snapshot) => {
+            for (const doc of snapshot.docs) {
+              await doc.ref.delete();
+            }
+          })
       );
     }
     await Promise.all(promises);
   }
 
   /**
-     * Return true if the token is invalid. So it can be removed from database.
-     * There are many error codes. see https://firebase.google.com/docs/cloud-messaging/send-message#admin
-     */
+   * Return true if the token is invalid. So it can be removed from database.
+   * There are many error codes. see https://firebase.google.com/docs/cloud-messaging/send-message#admin
+   */
   static isInvalidTokenErrorCode(code: string) {
     if (
       code === "messaging/invalid-registration-token" ||
-            code === "messaging/registration-token-not-registered" ||
-            code === "messaging/invalid-argument"
+      code === "messaging/registration-token-not-registered" ||
+      code === "messaging/invalid-argument"
     ) {
       return true;
     }
@@ -223,11 +227,11 @@ export class Messaging {
   }
 
   /**
-     * Returns tokens of multiple users.
-     *
-     * @param uids array of user uid
-     * @return array of tokens
-     */
+   * Returns tokens of multiple users.
+   *
+   * @param uids array of user uid
+   * @return array of tokens
+   */
   static async getTokensFromUids(uids: string): Promise<string[]> {
     if (!uids) return [];
     const promises: Promise<string[]>[] = [];
@@ -236,11 +240,11 @@ export class Messaging {
   }
 
   /**
-     * Returns tokens of a user.
-     *
-     * @param uid user uid
-     * @return array of tokens
-     */
+   * Returns tokens of a user.
+   *
+   * @param uid user uid
+   * @return array of tokens
+   */
   static async getTokens(uid: string): Promise<string[]> {
     if (!uid) return [];
     const snapshot = await Ref.tokenCol(uid).get();
@@ -253,11 +257,11 @@ export class Messaging {
   }
 
   /**
-     * Returns complete payload from the query data from client.
-     *
-     * @param query query data that has payload information
-     * @returns an object of payload
-     */
+   * Returns complete payload from the query data from client.
+   *
+   * @param query query data that has payload information
+   * @returns an object of payload
+   */
   static completePayload(query: SendMessage): MessagePayload {
     console.log(`completePayload(${JSON.stringify(query)})`);
 
@@ -273,7 +277,11 @@ export class Messaging {
     }
 
     if (!query.body) {
-      console.log(`completePayload() throws error: body-is-empty: (${JSON.stringify(query)})`);
+      console.log(
+        `completePayload() throws error: body-is-empty: (${JSON.stringify(
+          query
+        )})`
+      );
       throw Error("body-is-empty");
     }
 
@@ -287,7 +295,9 @@ export class Messaging {
     let parameterData = "";
     if (query.id && query.type == EventType.post) {
       initialPageName = "PostView";
-      parameterData = `{"postDocumentReference": "${Ref.postDoc(query.id!).path}" }`;
+      parameterData = `{"postDocumentReference": "${
+        Ref.postDoc(query.id!).path
+      }" }`;
     }
 
     const res: MessagePayload = {
@@ -335,8 +345,10 @@ export class Messaging {
     }
 
     if (res.notification.body != "") {
-      res.notification.body = Utils.removeHtmlTags(res.notification.body) ?? "";
-      res.notification.body = Utils.decodeHTMLEntities(res.notification.body) ?? "";
+      res.notification.body =
+        Library.removeHtmlTags(res.notification.body) ?? "";
+      res.notification.body =
+        Library.decodeHTMLEntities(res.notification.body) ?? "";
       if (res.notification.body.length > 255) {
         res.notification.body = res.notification.body.substring(0, 255);
       }
@@ -352,12 +364,14 @@ export class Messaging {
   }
 
   /**
-     * Returns an array of uid of the users (from the input uids) who has subscribed for new comment.
-     * The uids of the users who didn't subscribe will be removed on the returned array.
-     * @param uids array of uid
-     * @returns array of uid
-     */
-  static async getNewCommentNotificationUids(uids: string[]): Promise<string[]> {
+   * Returns an array of uid of the users (from the input uids) who has subscribed for new comment.
+   * The uids of the users who didn't subscribe will be removed on the returned array.
+   * @param uids array of uid
+   * @returns array of uid
+   */
+  static async getNewCommentNotificationUids(
+    uids: string[]
+  ): Promise<string[]> {
     if (uids.length === 0) return [];
     const promises: Promise<boolean>[] = [];
     for (const uid of uids) {

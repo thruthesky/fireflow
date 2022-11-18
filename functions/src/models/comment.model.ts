@@ -1,6 +1,6 @@
 import { CommentDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
-import { Utils } from "../utils/utils";
+import { Library } from "../utils/library";
 import { Post } from "./post.model";
 
 export class Comment {
@@ -22,8 +22,8 @@ export class Comment {
    * @returns Returns the uid of ancestors.
    */
   static async getAncestorsUid(
-      commentId: string,
-      authorUid?: string
+    commentId: string,
+    authorUid?: string
   ): Promise<string[]> {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
@@ -57,10 +57,10 @@ export class Comment {
     if (comment.parentCommentDocumentReference) {
       parent = await Comment.get(comment.parentCommentDocumentReference.id);
     }
-    const order = Utils.commentOrder(
-        parent?.order,
-        parent?.depth,
-        post.noOfComments
+    const order = Library.commentOrder(
+      parent?.order,
+      parent?.depth,
+      post.noOfComments
     );
     return Ref.commentDoc(commentId).update({
       depth: parent?.depth ? parent.depth + 1 : 1,

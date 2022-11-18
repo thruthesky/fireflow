@@ -10,6 +10,7 @@
     "deploy:functions": "eslint --fix --ext .js,.ts . && firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test:welcome-message": "mocha --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
+    "test:post.check-delete": "mocha --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/forum/post.check-delete.ts",
     "test:removetoken": "mocha --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts"
   },
   "engines": {
