@@ -18,6 +18,7 @@
 - [TODO](#todo)
 - [개요](#개요)
 - [기능](#기능)
+- [커뮤니티 기능 플로우챠트](#커뮤니티-기능-플로우챠트)
 - [Firestore DB 구조](#firestore-db-구조)
 - [시스템 설정](#시스템-설정)
   - [관리자 지정](#관리자-지정)
@@ -54,6 +55,57 @@
 - 회원 가입시 `users_public_data` 생성 및 회원 업데이트 할 때 마다 동기화. 이 문서에는 개인 정보를 뺀 나머지 정보만 저장되므로, 외부 공개용으로 사용.
 - 회원 가입시, 환영 인사 채팅 메시지 전송.
 
+
+
+# 커뮤니티 기능 플로우챠트
+
+```mermaid
+flowchart TD
+  H[[Home]] --> Register
+  H --> Profile
+  H --> ChatUserList
+  H --> MyPublicProfile
+  H --> MyLikes
+  H --> MyFavorites
+  H --> BlockUserList
+  H --> Forum[Forum Main & Categories]
+  Forum --> PostList
+  PostList --> isProfileComplete{Profile Complete?}
+  isProfileComplete -->|YES|PostCreate
+  PostCreate --> |Push Notification|PostList
+  PostList --> PostView
+  PostView <--> PostEdit
+  PostView --> PostDelete --> PostList
+  PostView --> Like
+  PostView --> Report
+  PostView --> Block
+  PostView --> Favorite
+  PostView --> Chat --> ChatUserList
+  PostView --> PublicProfile
+  PostView --> Share
+  PostView --> CommentList
+  PostView --> isProfileCompleteForComment{Profile Complete?}
+  PostView --> Delete --> PostList
+  CommentList --> Comment
+  Comment --> isProfileCompleteForComment{Profile Complete?}
+  isProfileCompleteForComment --> |Reply|CommentCreate
+  Comment --> CommentEdit
+  Comment --> Like
+  Comment --> Chat
+  Comment --> Report
+  Comment --> Block
+  Comment --> Favorite
+  
+  CommentCreate --> |Push Notification|PostView
+  
+  Profile --> BlockList
+  Profile --> WhoLikedMe
+
+  BlockList --> PublicProfile
+  PublicProfile --> Block[Block&UnBlock]
+  PublicProfile --> Like[Like&UnLike]
+  PublicProfile --> Report
+```
 
 # Firestore DB 구조
 
