@@ -64,6 +64,7 @@ export class Comment {
         post.noOfComments
     );
     return Ref.commentDoc(commentId).update({
+      category: post.category,
       depth: parent?.depth ? parent.depth + 1 : 1,
       order: order,
     });
