@@ -26,6 +26,7 @@ export class Post {
   ): Promise<admin.firestore.WriteResult> {
     return postDocumentReference.update({
       noOfComments: admin.firestore.FieldValue.increment(1),
+      hasComments: true,
     });
   }
 
