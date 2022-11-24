@@ -10,7 +10,11 @@
     "deploy:functions": "eslint --fix --ext .js,.ts . && firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test:welcome-message": "mocha --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
-    "test:removetoken": "mocha --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/remove-tokens.ts"
+    "test:removetoken": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/remove-tokens.ts",
+    "test:sendMessageWithActions": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-actions.ts",
+    "test:sendMessageWithTokens": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-tokens.ts",
+    "test:sendMessageWithUids": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-uids.ts",
+    "test:getAncestorsUid": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/comment/get-ancestors-uid.ts"
   },
   "engines": {
     "node": "16"

@@ -101,11 +101,11 @@ export class Test {
     data?: any
   ): Promise<CommentDocument> {
     if (uid === void 0) {
-      const user = await User.create("test" + Test.id(), {
-        createdAt: amdin.firestore.FieldValue.serverTimestamp(),
-      });
+      const user = await User.create("test" + Test.id(), {});
       uid = user!.uid;
     }
+
+    // console.log("uid", uid);
     const postRef = await Ref.postCol.add({
       userDocumentReference: Ref.userDoc(uid),
       category: category ?? "qna",

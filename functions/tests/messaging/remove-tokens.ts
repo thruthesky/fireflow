@@ -1,13 +1,13 @@
 import "mocha";
-import { expect } from "chai";
-import { Chat } from "../../src/models/chat.model";
-
 import "../firebase.init";
 
-import * as admin from "firebase-admin";
 import { Messaging } from "../../src/models/messaging.model";
+
 import { Test } from "../test";
 import { User } from "../../src/models/user.model";
+
+import { expect } from "chai";
+import * as admin from "firebase-admin";
 
 describe("Messaging", () => {
     it("Remove tokens", async () => {

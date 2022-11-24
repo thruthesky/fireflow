@@ -4,6 +4,13 @@ import { UserRecord } from "firebase-functions/v1/auth";
 import { UserDocument } from "../interfaces/user.interface";
 import { Ref } from "../utils/ref";
 
+
+/**
+ * user_settings field name that will holds the boolean value 
+ * when user want to get notified if new comments is created under user created posts/comments
+ */
+const notifyNewComments = "notify-new-comments";
+
 /**
  * User class
  *
@@ -11,7 +18,7 @@ import { Ref } from "../utils/ref";
  */
 export class User {
   static publicDoc(
-      uid: string
+    uid: string
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return Ref.publicDoc(uid);
   }
@@ -26,6 +33,7 @@ export class User {
     data.created_time = admin.firestore.FieldValue.serverTimestamp();
     const user = await this.get(uid);
     if (user) throw Error("user-exists");
+    data['uid'] = uid;
     await Ref.userDoc(uid).set(data);
     return this.get(uid);
   }
@@ -54,7 +62,7 @@ export class User {
     if (snapshot.exists === false) return false;
     const data = snapshot.data();
     if (data === void 0) return false;
-    return data["notify-new-comment-under-my-posts-and-comments"] ?? false;
+    return data[notifyNewComments] ?? false;
   }
 
   // /**
@@ -71,7 +79,7 @@ export class User {
   // }
 
   static async getUserByPhoneNumber(
-      phoneNumber: string
+    phoneNumber: string
   ): Promise<UserRecord | null> {
     try {
       const UserRecord = await Ref.auth.getUserByPhoneNumber(phoneNumber);
@@ -118,8 +126,8 @@ export class User {
    * @param otherUid is the user uid to be disabled.
    */
   static async disableUser(
-      adminUid: string,
-      otherUid: string
+    adminUid: string,
+    otherUid: string
   ): Promise<UserRecord> {
     this.checkAdmin(adminUid);
     const user = await Ref.auth.updateUser(otherUid, { disabled: true });
@@ -145,8 +153,8 @@ export class User {
    * @return promise of write result
    */
   static updatePublicData(
-      uid: string,
-      data: UserDocument
+    uid: string,
+    data: UserDocument
   ): Promise<admin.firestore.WriteResult> {
     const hasPhoto = !!data.photo_url;
     let complete = false;
@@ -159,19 +167,19 @@ export class User {
     delete data.phone_number;
     delete data.blockedUserList;
     return User.publicDoc(uid).set(
-        {
-          ...data,
-          isProfileComplete: complete,
-          userDocumentReference: Ref.userDoc(uid),
-          hasPhoto: hasPhoto,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
+      {
+        ...data,
+        isProfileComplete: complete,
+        userDocumentReference: Ref.userDoc(uid),
+        hasPhoto: hasPhoto,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
     );
   }
 
   static increaseNoOfPosts(
-      userDocumentReference: DocumentReference
+    userDocumentReference: DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return userDocumentReference.update({
       noOfPosts: admin.firestore.FieldValue.increment(1),
@@ -179,7 +187,7 @@ export class User {
   }
 
   static increaseNoOfComments(
-      userDocumentReference: DocumentReference
+    userDocumentReference: DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return userDocumentReference.update({
       noOfComments: admin.firestore.FieldValue.increment(1),
@@ -193,4 +201,19 @@ export class User {
   }): Promise<admin.firestore.WriteResult> {
     return Ref.tokenDoc(data.uid, data.fcm_token).set(data);
   }
+
+  static async setUserSettingsSubscription(
+    uid: string,
+    data: {
+      action?: string,
+      category?: string,
+      type?: string,
+      [key: string]: any;
+    }
+  ): Promise<admin.firestore.WriteResult> {
+
+    data['userDocumentReference'] = Ref.userDoc(uid);
+    return Ref.userSettingDoc(uid).set(data, { merge: true });
+  }
+
 }
