@@ -15,8 +15,19 @@ export const onPostCreate = functions
       futures.push(
           User.increaseNoOfPosts(post.userDocumentReference),
           Category.increaseNoOfPosts(post.category),
-          Setting.increaseNoOfPosts()
+          Setting.increaseNoOfPosts(),
+          Post.updateMeta(snap)
       );
+      return Promise.all(futures);
+    });
+
+export const onPostUpdate = functions
+    .region("asia-northeast3")
+    .firestore.document("/posts/{postId}")
+    .onUpdate((snap) => {
+      const futures = [];
+      const after = snap.after;
+      futures.push(Post.checkDelete(after));
       return Promise.all(futures);
     });
 
@@ -35,5 +46,15 @@ export const onCommentCreate = functions
           Setting.increaseNoOfComments(),
           Comment.updateMeta(comment, context.params.commentId)
       );
+      return Promise.all(futures);
+    });
+
+export const onCommentUpdate = functions
+    .region("asia-northeast3")
+    .firestore.document("/comments/{commentId}")
+    .onUpdate((snap) => {
+      const futures = [];
+      const after = snap.after;
+      futures.push(Comment.checkDelete(after));
       return Promise.all(futures);
     });

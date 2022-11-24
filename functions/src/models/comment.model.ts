@@ -1,6 +1,7 @@
+import * as admin from "firebase-admin";
 import { CommentDocument } from "../interfaces/forum.interface";
 import { Ref } from "../utils/ref";
-import { Utils } from "../utils/utils";
+import { Library } from "../utils/library";
 import { Post } from "./post.model";
 
 export class Comment {
@@ -57,14 +58,43 @@ export class Comment {
     if (comment.parentCommentDocumentReference) {
       parent = await Comment.get(comment.parentCommentDocumentReference.id);
     }
-    const order = Utils.commentOrder(
+    const order = Library.commentOrder(
         parent?.order,
         parent?.depth,
         post.noOfComments
     );
     return Ref.commentDoc(commentId).update({
+      category: post.category,
       depth: parent?.depth ? parent.depth + 1 : 1,
       order: order,
     });
+  }
+
+  /**
+   * 만약, 코멘트가 삭제되었으면, 즉, `{deleted: true}` 이면, 내용과 업로드된 파일을 삭제한다.
+   * @param after 글 after snapshot
+   */
+  static async checkDelete(
+      after: admin.firestore.QueryDocumentSnapshot
+  ): Promise<admin.firestore.WriteResult | null> {
+    const data = after.data() as CommentDocument;
+    if (data.deleted) {
+      console.log("--> comment deleted. going to empty the document");
+
+      if (data.files && data.files.length > 0) {
+        // delete files in firebase storage from data.files array
+        for (const url of data.files) {
+          const path = Library.getPathFromUrl(url);
+          const fileRef = admin.storage().bucket().file(path);
+          await fileRef.delete();
+        }
+      }
+      return after.ref.update({
+        content: "",
+        files: [],
+      });
+    } else {
+      return null;
+    }
   }
 }

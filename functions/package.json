@@ -7,21 +7,22 @@
     "serve": "npm run build && firebase emulators:start",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy:functions": "eslint --fix --ext .js,.ts . && firebase deploy --only functions",
+    "deploy:functions": "eslint --fix --ext .js,.ts . && npm run deploy",
+    "deploy": "firebase deploy --only functions:onUserCreate,functions:onUserUpdate,functions:onPostCreate,functions:onPostUpdate,functions:onCommentCreate,functions:onCommentUpdate,functions:onChatMessageCreate,functions:sendMessage,functions:messagingOnPostCreate,functions:messagingOnCommentCreate,functions:pushNotificationQueue",
     "logs": "firebase functions:log",
-    "test:welcome-message": "mocha --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
-    "test:removetoken": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/remove-tokens.ts",
     "test:sendMessageWithActions": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-actions.ts",
     "test:sendMessageWithTokens": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-tokens.ts",
     "test:sendMessageWithUids": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-uids.ts",
-    "test:getAncestorsUid": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/comment/get-ancestors-uid.ts"
+    "test:getAncestorsUid": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/comment/get-ancestors-uid.ts",
+    "test:welcome-message": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
+    "test:post.check-delete": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/forum/post.check-delete.ts",
+    "test:removetoken": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts"
   },
   "engines": {
     "node": "16"
   },
   "main": "lib/index.js",
   "dependencies": {
-    "dayjs": "^1.11.3",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.0.2"
   },

@@ -3,11 +3,11 @@ import * as functions from "firebase-functions";
 import { Messaging } from "../models/messaging.model";
 import { EventName, EventType } from "../utils/event-name";
 
-
-export const sendMessage = functions.region("asia-northeast3").https.onCall(async (data) => {
-  return Messaging.sendMessage(data);
-});
-
+export const sendMessage = functions
+    .region("asia-northeast3")
+    .https.onCall(async (data) => {
+      return Messaging.sendMessage(data);
+    });
 
 export const messagingOnPostCreate = functions
     .region("asia-northeast3")
@@ -31,13 +31,13 @@ export const messagingOnCommentCreate = functions
       return Messaging.sendMessage(data);
     });
 
-
 export const pushNotificationQueue = functions
     .region("asia-northeast3")
     .firestore.document("/push-notifications-queue/{docId}")
     .onCreate(async (snapshot) => {
       console.log("pushNotificationQueue::", JSON.stringify(snapshot));
       const re = await Messaging.sendMessage(snapshot.data());
+
       console.log("re::", re);
       return admin
           .firestore()
