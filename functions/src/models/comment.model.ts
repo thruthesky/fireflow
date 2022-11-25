@@ -28,10 +28,10 @@ export class Comment {
   ): Promise<string[]> {
     let comment = await Comment.get(commentId);
     const uids = [comment?.userDocumentReference.id];
-    while (
-      comment?.parentCommentDocumentReference &&
+    while (comment != null &&
+      comment.parentCommentDocumentReference &&
       comment.postDocumentReference.id !=
-        comment.parentCommentDocumentReference.id
+      comment.parentCommentDocumentReference.id
     ) {
       comment = await Comment.get(comment!.parentCommentDocumentReference.id);
       if (comment == null) break;

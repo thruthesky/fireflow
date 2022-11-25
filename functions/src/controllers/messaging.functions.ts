@@ -17,6 +17,7 @@ export const messagingOnPostCreate = functions
       data.id = snapshot.id;
       data.action = EventName.postCreate;
       data.type = EventType.post;
+      data.senderUid = data.userDocumentReference.id;
       return Messaging.sendMessage(data);
     });
 
@@ -28,6 +29,7 @@ export const messagingOnCommentCreate = functions
       data.id = snapshot.id;
       data.action = EventName.commentCreate;
       data.type = EventType.post;
+      data.senderUid = data.userDocumentReference.id;
       return Messaging.sendMessage(data);
     });
 

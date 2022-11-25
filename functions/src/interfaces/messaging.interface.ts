@@ -2,7 +2,7 @@ export interface SendMessage {
   id?: string; // / postId
   postId?: string; // postId from comment.
   uid?: string; // / added by 'auth' in flutter.
-  uids?: string; // 
+  uids?: string; //
   users?: string[];
   tokens?: string;
   topic?: string;
