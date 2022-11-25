@@ -6,13 +6,12 @@ import { ChatMessageDocument } from "../interfaces/chat.interface";
 //
 // 참고: README
 export const onChatMessageCreate = functions
-  .region("asia-northeast3")
-  .firestore.document("/chat_room_messages/{documentId}")
-  .onCreate(async (snap) => {
-    const futures = [];
-    futures.push(Chat.updateRoom(snap.data() as ChatMessageDocument));
-    return Promise.all(futures);
-  });
-
+    .region("asia-northeast3")
+    .firestore.document("/chat_room_messages/{documentId}")
+    .onCreate(async (snap) => {
+      const futures = [];
+      futures.push(Chat.updateRoom(snap.data() as ChatMessageDocument));
+      return Promise.all(futures);
+    });
 
 
