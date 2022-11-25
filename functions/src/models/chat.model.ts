@@ -3,7 +3,10 @@ import {
   ChatMessageDocument,
   ChatRoomDocument,
 } from "../interfaces/chat.interface";
+import { SendMessage } from "../interfaces/messaging.interface";
+import { EventType } from "../utils/event-name";
 import { Ref } from "../utils/ref";
+import { Messaging } from "./messaging.model";
 import { Setting } from "./setting.model";
 
 /**
@@ -20,19 +23,19 @@ export class Chat {
    * Save settings
    */
   static async updateRoom(
-      data: ChatMessageDocument
+    data: ChatMessageDocument
   ): Promise<admin.firestore.WriteResult> {
     const arr = data.chatRoomId.split("-");
     return Ref.chatRoomsDoc(data.chatRoomId).set(
-        {
-          chatRoomId: data.chatRoomId,
-          last_message: data.text,
-          last_message_timestamp: data.timestamp,
-          last_message_sent_by: data.senderUserDocumentReference,
-          last_message_seen_by: [data.senderUserDocumentReference],
-          users: [Ref.userDoc(arr[0]), Ref.userDoc(arr[1])],
-        },
-        { merge: true }
+      {
+        chatRoomId: data.chatRoomId,
+        last_message: data.text,
+        last_message_timestamp: data.timestamp,
+        last_message_sent_by: data.senderUserDocumentReference,
+        last_message_seen_by: [data.senderUserDocumentReference],
+        users: [Ref.userDoc(arr[0]), Ref.userDoc(arr[1])],
+      },
+      { merge: true }
     );
   }
 
@@ -59,5 +62,12 @@ export class Chat {
     } else {
       return null;
     }
+  }
+
+
+  static async getOtherUserUidFromChatMessageDocument(data: ChatMessageDocument): Promise<string> {
+    const chatRoomSnap = await Ref.chatRoomsDoc(data["chatRoomId"]).get();
+    const chatRoomData = chatRoomSnap.data() as ChatRoomDocument;
+    return data.senderUserDocumentReference.id == chatRoomData.users[0].id ? chatRoomData.users[1].id : chatRoomData.users[0].id;
   }
 }
