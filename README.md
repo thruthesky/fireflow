@@ -170,6 +170,13 @@ flowchart TD
 
 
 
+- `command` field
+  - The app can run a command on backend by setting the command on `/users/{uid} { command: ... }` field.
+  - For instance, if a user set `delete` on his `command` field, then the user account will be deleted. This `delete` command is being used for acccount deletion (resinanation).
+
+
+
+
 # Chat
 
 
