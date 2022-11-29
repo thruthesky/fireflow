@@ -24,13 +24,27 @@
   - [관리자 지정](#관리자-지정)
   - [헬퍼 사용자 지정](#헬퍼-사용자-지정)
 - [사용자](#사용자)
-- [채팅](#채팅)
+- [Chat](#chat)
+  - [Database structure of Chat](#database-structure-of-chat)
+    - [Chat rooms](#chat-rooms)
+    - [Chat room messages](#chat-room-messages)
+  - [Chat logics](#chat-logics)
+  - [When a user creates a chat room](#when-a-user-creates-a-chat-room)
+    - [For 1:1 chat](#for-11-chat)
+    - [For group chat](#for-group-chat)
+    - [Inviting users](#inviting-users)
+  - [When a user enters a chat room](#when-a-user-enters-a-chat-room)
+  - [How to list my chat rooms.](#how-to-list-my-chat-rooms)
+  - [How to count No of new message.](#how-to-count-no-of-new-message)
+  - [How to set new message.](#how-to-set-new-message)
+  - [Change title](#change-title)
 - [가입 환영 인사](#가입-환영-인사)
 - [게시판](#게시판)
   - [카테고리](#카테고리)
   - [글](#글)
   - [코멘트](#코멘트)
-- [채팅](#채팅-1)
+    - [글 삭제](#글-삭제)
+- [채팅](#채팅)
 - [보안](#보안)
 # TODO
 
@@ -156,7 +170,105 @@ flowchart TD
 
 
 
-# 채팅
+# Chat
+
+
+- The default chat functionality in FlutterFlow is no good.
+  - No custom design support.
+  - No extra action on touching messages.
+  - And the biggest problem is user's private information is revealed to the world. There are no other way but to open user's document to the world. This is the reason why we need to build our own chat functionality.
+
+
+## Database structure of Chat
+
+### Chat rooms
+
+
+
+```mermaid
+erDiagram
+  chat_rooms {
+    String last_message "The last chat message."
+    Array_Of_UserDocumentReference last_message_seen_by "Array of user reference who have read the message."
+    UserDocumentReference last_message_sent_by "The user reference of the last chat message sender."
+    Timestamp last_message_timestamp "The timestamp of last message."
+    Array_Of_UserDocumentReference users "The user document reference of participants of the chat room"
+    String title "chat room title"
+    String moderatorUserDocumentReference "The user document reference of chat room owner."
+  }
+```
+
+* The `Document ID` is the chat room id. and it can be in two forms.
+  * For 1:1 chat, it is in the form of `UID-UID`. There are two users only on 1:1 chat. So, we put the two uids in the document id. The chat room id is ordered as ascending.
+    * For entering 1:1 chat room, the app only needs to know `who` the user wants to chat. And this makes easy to enter a chat room entering from post view screen, or profile screen. You just need to get the other user's uid.
+    * In the chat room, the other chat user's photo and name should be displayed as appbar title.
+  * For group chat, the `chat room id` is created as random document id.
+    * To enter a group chat room, you need to know the `chat room id`.
+    * In chat room, the title and no of users should appear as title of appbar.
+
+
+### Chat room messages
+
+```mermaid
+erDiagram
+  chat_room_messages {
+    String chatRoomId "The chat room id"
+    String text "The chat message."
+    senderUserDocumentReference last_message_sent_by "The user reference of the last chat message sender."
+    Timestamp last_message_timestamp "The timestamp of last message."
+  }
+```
+
+
+## Chat logics
+
+
+## When a user creates a chat room
+
+### For 1:1 chat
+
+* The app must pass the document of `users_public_data` to chat room.
+* The chat room will be created by `ChatRoomMessages` custom widget in FF.
+  * `A` opens a chat room with `B` in FF, `ChatRoomMessages` will create the chat room if it does not exist.
+
+### For group chat
+
+* User creates a group chat by entering `title`.
+
+### Inviting users
+
+* For group chat, a user can invite another user.
+
+
+
+## When a user enters a chat room
+
+
+
+
+
+
+
+## How to list my chat rooms.
+
+- Do backend query on chat_rooms where my user document reference is in `users` field. That's my rooms.
+
+## How to count No of new message.
+
+- Get all the document of my chat rooms, and count rooms where my user document reference is not in `last_message_seen_by`.
+
+## How to set new message.
+
+- When the user A in the chat sends a message, set the user document reference of A in  `last_message_seen_by`. Note that, this is done by backend. So, the app does not need to do anything about it.
+
+
+
+## Change title
+
+- For group chat, the owner of the chat can change the title.
+
+
+
 
 
 - TODO: 현재는 1:1 채팅방만 지원한다. 채팅방 아이디가 `UID-UID` 로 정해지는데, 그룹 채팅인 경우는 채팅방 아이디를 그냥 자동생성한 문서 아이디로 하고, `/chat_rooms` 의 `users` 필드에 두 명이 아닌 여러명의 사용자를 기록해서 그룹 채팅을 할 수 있도록 한다. 이 때, `new_messages` 맵에 `{uid: [count]}` 와 같이 해서, 각 사용자당 읽지 않은 메시지 수를 기록 하도록 한다. 즉, 그룹 채팅에 메시지를 보내기 위해서는 채팅방 아이디를 알아야한다. 참고로 1:1 채팅에서는 채팅방 아이디가 `UID-UID`이므로, 채팅방이 아닌 외부에서도 메시지를 보낼 수 있다. 가능한 동일한 구조를 유지하며, 1:1 채팅방과 호환이 되도록 작성한다.
@@ -239,8 +351,6 @@ flowchart TD
   - `category` 가 자동 추가된다. 글 카테고리와 마찬가지로 코멘트에도 카테고리가 필요한 경우가 있다. 이와 같은 경우, 해당 카테고리에 어떤 코멘트가 있는지 표시하기 위해서 클라이언트에서 직접 저장을 하면 된다. 주의 할 것은, 코멘트 생성시 (한번만) 추가된다. 수정을 할 때 임의로 다른 값을 저장 해도 된다.
   - 코멘의 글(부모 글)을 업데이트하는데 `noOfComments` 에 코멘트 개 수, `hasComments` 에 true 가 저장된다.
 
-- 코멘트를 삭제 할 때에는 실제 문서를 삭제하면 안되고, `deleted: true` 필드를 저장하면 된다. 즉, 삭제되었다는 표시만 해 놓는 것으로, 앱 화면에 보여 줄 때에도 `삭제되었습니다.` 라고 저장 해 놓으면 된다.
-
 - 코멘트의 정렬에 사용되는 `order` 는 글의 `noOfComments` 와 연관되어 동작한다. 그래서, 코멘트를 삭제 할 때, `noOfComments` 의 값을 -1 하면 안된다. 이 문제를 해결 하기 위해서는 `order` 필드를 `noOfComments` 가 아닌, 다른 필드에 총 기록된 코멘트 수를 따로 보관해야 한다.
 
 
@@ -248,6 +358,9 @@ flowchart TD
   - `title` - 코멘트 제목. 코멘트에도 필요한 경우 제목을 추가해도 된다.
   - `hasPhoto` - 사진이 업로드되었는지 확인. 게시글에 사진이 업로드되었으면, `true` 를 저장하고, 아니면 `false` 를 지정한다. 이렇게 하면, 사진이 있는 코멘트만 쉽게 골라 낼 수 있다.
 
+### 글 삭제
+
+- 코멘트를 삭제 할 때에는 실제 문서를 삭제하면 안되고, `deleted: true` 필드를 저장하면 된다. 즉, 삭제되었다는 표시만 해 놓는 것으로, 앱 화면에 보여 줄 때에도 `삭제되었습니다.` 라고 저장 해 놓으면 된다.
 
 # 채팅
 
