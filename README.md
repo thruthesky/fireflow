@@ -46,6 +46,8 @@
     - [글 삭제](#글-삭제)
 - [채팅](#채팅)
 - [보안](#보안)
+- [Test codes](#test-codes)
+  - [lab folder](#lab-folder)
 # TODO
 
 * Firestore 보안 규칙 확인
@@ -380,4 +382,13 @@ erDiagram
 
 
 
+
+
+
+
+# Test codes
+
+## lab folder
+
+- The code under lab folder is a labratory code and you should not use.
 
