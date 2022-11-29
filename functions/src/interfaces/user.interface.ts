@@ -10,8 +10,8 @@ export interface UserDocument {
   gender: string;
   birth_date: admin.firestore.Timestamp;
   blockedUserList?: Array<DocumentReference>;
+  command?: "delete" | "disable";
 }
-
 
 export interface UserSettingsDocument {
   action: string;
