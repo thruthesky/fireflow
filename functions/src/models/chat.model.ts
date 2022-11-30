@@ -20,10 +20,9 @@ export class Chat {
    * Save settings
    */
   static async updateRoom(
-      data: ChatMessageDocument
+    data: ChatMessageDocument
   ): Promise<admin.firestore.WriteResult> {
-    return Ref.chatRoomsDoc(data.chatRoomId).update({
-      chatRoomId: data.chatRoomId,
+    return data.chatRoomDocumentReference.update({
       last_message: data.text,
       last_message_timestamp: data.timestamp,
       last_message_sent_by: data.senderUserDocumentReference,
@@ -43,7 +42,7 @@ export class Chat {
       const chatRoomId = [system.helperUid, uid].sort().join("-");
 
       const message: ChatMessageDocument = {
-        chatRoomId: chatRoomId,
+        chatRoomDocumentReference: Ref.chatRoomsCol.doc(chatRoomId),
         senderUserDocumentReference: Ref.userDoc(system.helperUid),
         text: system.welcomeMessage,
         timestamp: admin.firestore.Timestamp.now(),
@@ -56,13 +55,15 @@ export class Chat {
     }
   }
 
-  static async getOtherUserUidFromChatMessageDocument(
-      data: ChatMessageDocument
+  static async getOtherUserUidsFromChatMessageDocument(
+    data: ChatMessageDocument
   ): Promise<string> {
-    const chatRoomSnap = await Ref.chatRoomsDoc(data["chatRoomId"]).get();
-    const chatRoomData = chatRoomSnap.data() as ChatRoomDocument;
-    return data.senderUserDocumentReference.id == chatRoomData.users[0].id ?
-      chatRoomData.users[1].id :
-      chatRoomData.users[0].id;
+    const chatRoomDoc = await data.chatRoomDocumentReference.get();
+    const chatRoomData = chatRoomDoc.data() as ChatRoomDocument;
+    const refs = chatRoomData.users.filter(
+      (ref) => ref !== data.senderUserDocumentReference
+    );
+
+    return refs.map((ref) => ref.id).join(",");
   }
 }

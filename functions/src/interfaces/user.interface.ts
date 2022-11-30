@@ -12,6 +12,16 @@ export interface UserDocument {
   blockedUserList?: Array<DocumentReference>;
   command?: "delete" | "disable";
 }
+export interface UserPublicDataDocument {
+  uid: string;
+  display_name: string;
+  created_time: admin.firestore.Timestamp;
+  photo_url: string;
+  gender: string;
+  birth_date: admin.firestore.Timestamp;
+  blockedUserList?: Array<DocumentReference>;
+  command?: "delete" | "disable";
+}
 
 export interface UserSettingsDocument {
   action: string;

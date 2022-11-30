@@ -1,5 +1,10 @@
 # Fireflow
 
+- This project is for supporting FlutterFlow apps.
+
+
+
+
 * 플러터플로를 통해 앱 개발을 할 때 백엔드의 역할이 필요하다.
   * 예를 들면, 코멘트 작성할 때,
     * 글 작성자가 총 몇개의 코멘트를 작성했는지, 글 작성자 문서의 noOfComments 를 업데이트하고,
@@ -20,8 +25,9 @@
 - [기능](#기능)
 - [커뮤니티 기능 플로우챠트](#커뮤니티-기능-플로우챠트)
 - [Firestore DB 구조](#firestore-db-구조)
+  - [Firestore Indexes](#firestore-indexes)
 - [시스템 설정](#시스템-설정)
-  - [관리자 지정](#관리자-지정)
+  - [How to set a user as admin](#how-to-set-a-user-as-admin)
   - [헬퍼 사용자 지정](#헬퍼-사용자-지정)
 - [사용자](#사용자)
 - [Chat](#chat)
@@ -130,6 +136,13 @@ flowchart TD
 - `/settings` 에 앱/시스템 자체의 설정이다. 참고, 관리자 지정, 헬퍼 지정
 - `/user_settings` 에 각 사용자별 설정을 저장한다.
 
+
+
+
+## Firestore Indexes
+
+- We don't use any of the security rules from FF. Instead, we defined our own Firestore security rules.
+
 # 시스템 설정
 
 - `/settings/system` 에는 시스템 설정을 지정한다. 주로 앱 버전, 헬퍼 사용자 지정 등을 할 수 있다.
@@ -138,11 +151,15 @@ flowchart TD
   - `noOfPosts` - 총 글 수 (todo)
   - `noOfComments` - 총 코멘트 수 (todo)
 
-## 관리자 지정
+## How to set a user as admin
 
-- `/settings/admins` 에 `{ uid: boolean }` 형태로 관리자를 지정한다.
-  - UID 를 키로 여러명의 사용자를 지정 할 수 있다.
-  - 예) `/settings/admins { 9Sefounafeou384: true }` 이면, 해당 사용자는 관리자가 된다.
+- Add the user's UID as a field as in `/settings/admins { uid: boolean }`.
+  - You may add multiple users as admin.
+  - ex) `/settings/admins { 9Sefounafeou384: true }`
+
+- Then, set the `admin` field to true in user's document.
+  - ex) `/users/9Sefounafeou384 {admin: true}`
+
 
 
 

@@ -1,14 +1,13 @@
 import * as admin from "firebase-admin";
 
 export interface ChatMessageDocument {
-  chatRoomId: string;
+  chatRoomDocumentReference: admin.firestore.DocumentReference;
   senderUserDocumentReference: admin.firestore.DocumentReference;
   text: string;
   timestamp: admin.firestore.Timestamp;
 }
 
 export interface ChatRoomDocument {
-  chatRoomId: string;
   last_message: string;
   last_message_seen_by: Array<admin.firestore.DocumentReference>;
   last_message_sent_by: admin.firestore.DocumentReference;
