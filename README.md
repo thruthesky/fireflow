@@ -205,6 +205,10 @@ flowchart TD
   - And the biggest problem is user's private information is revealed to the world. There are no other way but to open user's document to the world. This is the reason why we need to build our own chat functionality.
 
 
+- When backend sends a push notification to users, the payload has `otherUserDocumentReference`, `otherUserDocument`, `chatRoomDocument`.
+  - And it is up to you how you design the app.
+  - For instance, if the `chatRoomDocument` has `moderatorUserDocumentReference`, then it is a group chat. So, you can design to show group chat room look.
+
 ## Database structure of Chat
 
 ### Chat rooms

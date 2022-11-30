@@ -1,6 +1,8 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { ChatMessageDocument } from "../interfaces/chat.interface";
+import { CommentDocument, PostDocument } from "../interfaces/forum.interface";
+import { SendMessage } from "../interfaces/messaging.interface";
 import { Messaging } from "../models/messaging.model";
 import { EventName, EventType } from "../utils/event-name";
 
@@ -14,11 +16,14 @@ export const messagingOnPostCreate = functions
     .region("asia-northeast3")
     .firestore.document("/posts/{postId}")
     .onCreate((snapshot) => {
-      const data = snapshot.data();
-      data.id = snapshot.id;
-      data.action = EventName.postCreate;
-      data.type = EventType.post;
-      data.senderUid = data.userDocumentReference.id;
+      const post: PostDocument = snapshot.data() as PostDocument;
+      const data: SendMessage = {
+        ...post,
+        id: snapshot.id,
+        action: EventName.postCreate,
+        type: EventType.post,
+        senderUserDocumentReference: post.userDocumentReference,
+      };
       return Messaging.sendMessage(data);
     });
 
@@ -26,11 +31,14 @@ export const messagingOnCommentCreate = functions
     .region("asia-northeast3")
     .firestore.document("/comments/{commentId}")
     .onCreate((snapshot) => {
-      const data = snapshot.data();
-      data.id = snapshot.id;
-      data.action = EventName.commentCreate;
-      data.type = EventType.post;
-      data.senderUid = data.userDocumentReference.id;
+      const comment: CommentDocument = snapshot.data() as CommentDocument;
+      const data: SendMessage = {
+        ...comment,
+        id: snapshot.id,
+        action: EventName.commentCreate,
+        type: EventType.post,
+        senderUserDocumentReference: comment.userDocumentReference,
+      };
       return Messaging.sendMessage(data);
     });
 
@@ -39,7 +47,7 @@ export const pushNotificationQueue = functions
     .firestore.document("/push-notifications-queue/{docId}")
     .onCreate(async (snapshot) => {
       console.log("pushNotificationQueue::", JSON.stringify(snapshot));
-      const re = await Messaging.sendMessage(snapshot.data());
+      const re = await Messaging.sendMessage(snapshot.data() as SendMessage);
 
       console.log("re::", re);
       return admin
@@ -52,14 +60,16 @@ export const pushNotificationQueue = functions
           });
     });
 
-
 export const messagingOnChatMessageCreate = functions
     .region("asia-northeast3")
     .firestore.document("/chat_room_messages/{documentId}")
     .onCreate(async (snap) => {
       const futures = [];
-      futures.push(Messaging.sendChatNotificationToOtherUser(snap.data() as ChatMessageDocument));
+
+      futures.push(
+          Messaging.sendChatNotificationToOtherUser(
+        snap.data() as ChatMessageDocument
+          )
+      );
       return Promise.all(futures);
     });
-
-

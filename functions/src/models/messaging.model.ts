@@ -21,7 +21,7 @@ export class Messaging {
    * @param data information of sending message
    * @returns results
    */
-  static async sendMessage(data: any): Promise<any> {
+  static async sendMessage(data: SendMessage): Promise<any> {
     if (data.topic) {
       // / see TODO in README.md
     } else if (data.tokens) {
@@ -44,7 +44,7 @@ export class Messaging {
    *  'category' is the category of the post.
    * @returns
    */
-  static async sendMessageByAction(data: any) {
+  static async sendMessageByAction(data: SendMessage) {
     console.log(`sendMessageByAction(${JSON.stringify(data)})`);
 
     if (!data.action) {
@@ -56,7 +56,7 @@ export class Messaging {
 
     // commentCreate get post and patch data with category and title.
     if (data.action == EventName.commentCreate) {
-      const post = await Post.get(data.postDocumentReference.id);
+      const post = await Post.get(data.postDocumentReference!.id);
       uids.push(post.userDocumentReference.id); // post owner
       data.category = post.category;
       data.title = post.title;
@@ -68,26 +68,26 @@ export class Messaging {
     // Get users who subscribed the subscription
     // TODO make this a function.
     const snap = await Ref.db
-      .collection("user_settings")
-      .where("action", "==", data.action)
-      .where("category", "==", data.category)
-      .get();
+        .collection("user_settings")
+        .where("action", "==", data.action)
+        .where("category", "==", data.category)
+        .get();
 
     console.log("snap.size", snap.size);
 
     // get uids
     if (snap.size != 0) {
       for (const doc of snap.docs) {
-        const d = doc.data() as UserSettingsDocument;
-        const uid = d.userDocumentReference.id;
-        if (uid != data.senderUid) uids.push(uid);
+        const s = doc.data() as UserSettingsDocument;
+        const uid = s.userDocumentReference.id;
+        if (uid != data.senderUserDocumentReference!.id) uids.push(uid);
       }
     }
     //
 
     // Get ancestor's uid
     if (data.action == EventName.commentCreate) {
-      const ancestors = await Comment.getAncestorsUid(data.id, data.uid);
+      const ancestors = await Comment.getAncestorsUid(data.id!, data.uid);
 
       // Remove ancestors who didn't subscribe for new comment.
       const subscribers = await this.getNewCommentNotificationUids(ancestors);
@@ -112,8 +112,8 @@ export class Messaging {
    * @param data data to send push notification.
    */
   static async sendMessageToTokens(
-    tokens: string[],
-    data: any
+      tokens: string[],
+      data: any
   ): Promise<{ success: number; error: number }> {
     console.log(`sendMessageToTokens() token.length: ${tokens.length}`);
     if (tokens.length == 0) {
@@ -135,8 +135,8 @@ export class Messaging {
     // Save [sendMulticast()] into a promise.
     for (const _500Tokens of chunks) {
       const newPayload: admin.messaging.MulticastMessage = Object.assign(
-        {},
-        { tokens: _500Tokens },
+          {},
+          { tokens: _500Tokens },
         payload as any
       );
       multicastPromise.push(admin.messaging().sendMulticast(newPayload));
@@ -154,6 +154,7 @@ export class Messaging {
         settledIndex < settled.length;
         settledIndex++
       ) {
+        console.log(`settled[${settledIndex}]`, settled[settledIndex]);
         const value = (settled[settledIndex] as any).value;
         successCount += value.successCount;
         failureCount += value.failureCount;
@@ -181,8 +182,8 @@ export class Messaging {
       return results;
     } catch (e) {
       console.log(
-        "---> caught on sendMessageToTokens() await Promise.allSettled()",
-        e
+          "---> caught on sendMessageToTokens() await Promise.allSettled()",
+          e
       );
       throw e;
     }
@@ -201,16 +202,16 @@ export class Messaging {
     const promises: Promise<any>[] = [];
     for (const token of tokens) {
       promises.push(
-        // Get the document of the token
-        Ref.db
-          .collectionGroup("fcm_tokens")
-          .where("fcm_token", "==", token)
-          .get()
-          .then(async (snapshot) => {
-            for (const doc of snapshot.docs) {
-              await doc.ref.delete();
-            }
-          })
+          // Get the document of the token
+          Ref.db
+              .collectionGroup("fcm_tokens")
+              .where("fcm_token", "==", token)
+              .get()
+              .then(async (snapshot) => {
+                for (const doc of snapshot.docs) {
+                  await doc.ref.delete();
+                }
+              })
       );
     }
     await Promise.all(promises);
@@ -283,9 +284,9 @@ export class Messaging {
 
     if (!query.body) {
       console.log(
-        `completePayload() throws error: body-is-empty: (${JSON.stringify(
-          query
-        )})`
+          `completePayload() throws error: body-is-empty: (${JSON.stringify(
+              query
+          )})`
       );
       throw Error("body-is-empty");
     }
@@ -303,21 +304,21 @@ export class Messaging {
       parameterData = `{"postDocumentReference": "${
         Ref.postDoc(query.id!).path
       }", "postDocument": "${Ref.postDoc(query.id!).path}" }`;
-    } else if (query.senderUid && query.type == EventType.chat) {
+    } else if (query.type == EventType.chat) {
       // get user uid
       initialPageName = "ChatRoom";
-      parameterData = `{"otherUserDocumentReference": "${
-        Ref.publicDoc(query.senderUid!).path
-      }", "otherUserDocument": "${
-        Ref.publicDoc(query.senderUid!).path
-      }", "chatRoomDocument": "${query.documentReference}" }`;
+      parameterData = `{"otherUserDocument": "${
+        query.senderUserDocumentReference!.path
+      }", "chatRoomDocument": "${query.chatRoomDocumentReference!.path}" }`;
     }
 
     const res: MessagePayload = {
       data: {
         id: query.id ?? "",
         type: query.type ?? "",
-        senderUid: query.senderUid ?? query.uid ?? "",
+        senderUserDocumentReference:
+          query.senderUserDocumentReference?.path ?? "",
+        chatRoomDocumentReference: query.chatRoomDocumentReference!.path ?? "",
         badge: query.badge ?? "",
         initialPageName: initialPageName,
         parameterData: parameterData,
@@ -371,7 +372,7 @@ export class Messaging {
       res.apns.payload.aps["badge"] = parseInt(query.badge);
     }
 
-    console.log(`completePayload() return value: ${JSON.stringify(res)}`);
+    console.log(`--> completePayload() return value: ${JSON.stringify(res)}`);
 
     return res;
   }
@@ -383,7 +384,7 @@ export class Messaging {
    * @returns array of uid
    */
   static async getNewCommentNotificationUids(
-    uids: string[]
+      uids: string[]
   ): Promise<string[]> {
     if (uids.length === 0) return [];
     const promises: Promise<boolean>[] = [];
@@ -407,14 +408,15 @@ export class Messaging {
    */
   static async sendChatNotificationToOtherUser(data: ChatMessageDocument) {
     const user = await User.get(data.senderUserDocumentReference.id);
-    const sendMessage = {
+    const messageData: SendMessage = {
+      ...data,
       type: EventType.chat,
       title: `${user?.display_name ?? ""} send you a message.`,
       body: data.text,
-      senderUid: data.senderUserDocumentReference.id,
       uids: await Chat.getOtherUserUidsFromChatMessageDocument(data),
-      documentReference: data.chatRoomDocumentReference,
-    } as SendMessage;
-    return this.sendMessage(sendMessage);
+      chatRoomDocumentReference: data.chatRoomDocumentReference,
+      senderUserDocumentReference: data.senderUserDocumentReference,
+    };
+    return this.sendMessage(messageData);
   }
 }

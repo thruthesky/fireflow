@@ -12,11 +12,26 @@ export interface SendMessage {
   body?: string; // message body
   content?: string; // this will be used as message body if message body is empty.
   type?: string;
-  senderUid?: string; // / uid
+
   badge?: string;
   icon?: string; // imageUrl
+
+  // for sending messages of new posts, comments.
+  userDocumentReference?: admin.firestore.DocumentReference;
+
   clickAction?: string; // customize web click action
-  documentReference?: admin.firestore.DocumentReference;
+  chatRoomDocumentReference?: admin.firestore.DocumentReference; // 채팅방 ref
+  // 푸시 알림 전송자 ref ( 글, 코멘트, 채팅 메시지 등에서 푸시 알림 전송자 ref)
+  senderUserDocumentReference?: admin.firestore.DocumentReference;
+
+  //
+  action?: string;
+
+  // for sending messages by action. Like post-create, comment-create.
+  postDocumentReference?: admin.firestore.DocumentReference;
+
+  // for sending messages by action. Like post-create, comment-create.
+  category?: string;
 }
 
 export interface MessagePayload {
@@ -25,7 +40,8 @@ export interface MessagePayload {
   data: {
     id?: string;
     type?: string;
-    senderUid?: string;
+    senderUserDocumentReference?: string;
+    chatRoomDocumentReference?: string;
     badge?: string;
     [key: string]: any;
   };
