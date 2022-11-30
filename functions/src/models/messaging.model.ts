@@ -7,11 +7,7 @@ import { Library } from "../utils/library";
 import { Comment } from "../models/comment.model";
 import { User } from "./user.model";
 import { Post } from "./post.model";
-import {
-  UserDocument,
-  UserPublicDataDocument,
-  UserSettingsDocument,
-} from "../interfaces/user.interface";
+import { UserSettingsDocument } from "../interfaces/user.interface";
 import { ChatMessageDocument } from "../interfaces/chat.interface";
 import { Chat } from "./chat.model";
 
@@ -312,7 +308,9 @@ export class Messaging {
       initialPageName = "ChatRoom";
       parameterData = `{"otherUserDocumentReference": "${
         Ref.publicDoc(query.senderUid!).path
-      }", "otherUserDocument": "${Ref.publicDoc(query.senderUid!).path}" }`;
+      }", "otherUserDocument": "${
+        Ref.publicDoc(query.senderUid!).path
+      }", "chatRoomDocument": "${query.documentReference}" }`;
     }
 
     const res: MessagePayload = {
@@ -408,18 +406,14 @@ export class Messaging {
    * @returns
    */
   static async sendChatNotificationToOtherUser(data: ChatMessageDocument) {
-    const senderDoc = await Ref.publicDoc(
-      data.senderUserDocumentReference.id
-    ).get();
-
-    const sender: UserPublicDataDocument =
-      senderDoc.data() as UserPublicDataDocument;
+    const user = await User.get(data.senderUserDocumentReference.id);
     const sendMessage = {
       type: EventType.chat,
-      title: `${sender.display_name ?? ""} send you a message.`,
+      title: `${user?.display_name ?? ""} send you a message.`,
       body: data.text,
       senderUid: data.senderUserDocumentReference.id,
       uids: await Chat.getOtherUserUidsFromChatMessageDocument(data),
+      documentReference: data.chatRoomDocumentReference,
     } as SendMessage;
     return this.sendMessage(sendMessage);
   }

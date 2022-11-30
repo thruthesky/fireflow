@@ -20,7 +20,7 @@ export class Chat {
    * Save settings
    */
   static async updateRoom(
-    data: ChatMessageDocument
+      data: ChatMessageDocument
   ): Promise<admin.firestore.WriteResult> {
     return data.chatRoomDocumentReference.update({
       last_message: data.text,
@@ -56,12 +56,12 @@ export class Chat {
   }
 
   static async getOtherUserUidsFromChatMessageDocument(
-    data: ChatMessageDocument
+      data: ChatMessageDocument
   ): Promise<string> {
     const chatRoomDoc = await data.chatRoomDocumentReference.get();
     const chatRoomData = chatRoomDoc.data() as ChatRoomDocument;
     const refs = chatRoomData.users.filter(
-      (ref) => ref !== data.senderUserDocumentReference
+        (ref) => ref !== data.senderUserDocumentReference
     );
 
     return refs.map((ref) => ref.id).join(",");

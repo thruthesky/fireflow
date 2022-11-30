@@ -1,3 +1,5 @@
+import * as admin from "firebase-admin";
+
 export interface SendMessage {
   id?: string; // / postId
   postId?: string; // postId from comment.
@@ -14,6 +16,7 @@ export interface SendMessage {
   badge?: string;
   icon?: string; // imageUrl
   clickAction?: string; // customize web click action
+  documentReference?: admin.firestore.DocumentReference;
 }
 
 export interface MessagePayload {
