@@ -5,56 +5,58 @@ import { Setting } from "../models/setting.model";
 import { Category } from "../models/category.model";
 import { Post } from "../models/post.model";
 import { Comment } from "../models/comment.model";
+import { Storage } from "../models/storage.model";
 
 export const onPostCreate = functions
-    .region("asia-northeast3")
-    .firestore.document("/posts/{postId}")
-    .onCreate((snap) => {
-      const futures = [];
-      const post = snap.data() as PostDocument;
-      futures.push(
-          User.increaseNoOfPosts(post.userDocumentReference),
-          Category.increaseNoOfPosts(post.category),
-          Setting.increaseNoOfPosts(),
-          Post.updateMeta(snap)
-      );
-      return Promise.all(futures);
-    });
+  .region("asia-northeast3")
+  .firestore.document("/posts/{postId}")
+  .onCreate((snap) => {
+    const futures = [];
+    const post = snap.data() as PostDocument;
+    futures.push(
+      User.increaseNoOfPosts(post.userDocumentReference),
+      Category.increaseNoOfPosts(post.category),
+      Setting.increaseNoOfPosts(),
+      Post.updateMeta(snap),
+      Storage.updateMeta(snap)
+    );
+    return Promise.all(futures);
+  });
 
 export const onPostUpdate = functions
-    .region("asia-northeast3")
-    .firestore.document("/posts/{postId}")
-    .onUpdate((snap) => {
-      const futures = [];
-      const after = snap.after;
-      futures.push(Post.checkDelete(after));
-      return Promise.all(futures);
-    });
+  .region("asia-northeast3")
+  .firestore.document("/posts/{postId}")
+  .onUpdate((snap) => {
+    const futures = [];
+    const after = snap.after;
+    futures.push(Post.checkDelete(after));
+    return Promise.all(futures);
+  });
 
 export const onCommentCreate = functions
-    .region("asia-northeast3")
-    .firestore.document("/comments/{commentId}")
-    .onCreate((snap, context) => {
-      const futures = [];
-      const comment = snap.data() as CommentDocument;
-      futures.push(
-          Post.increaseNoOfComments(comment.postDocumentReference),
-          User.increaseNoOfComments(comment.userDocumentReference),
-          Category.increaseNoOfCommentsFromPostDocumentReference(
-              comment.postDocumentReference
-          ),
-          Setting.increaseNoOfComments(),
-          Comment.updateMeta(comment, context.params.commentId)
-      );
-      return Promise.all(futures);
-    });
+  .region("asia-northeast3")
+  .firestore.document("/comments/{commentId}")
+  .onCreate((snap, context) => {
+    const futures = [];
+    const comment = snap.data() as CommentDocument;
+    futures.push(
+      Post.increaseNoOfComments(comment.postDocumentReference),
+      User.increaseNoOfComments(comment.userDocumentReference),
+      Category.increaseNoOfCommentsFromPostDocumentReference(
+        comment.postDocumentReference
+      ),
+      Setting.increaseNoOfComments(),
+      Comment.updateMeta(comment, context.params.commentId)
+    );
+    return Promise.all(futures);
+  });
 
 export const onCommentUpdate = functions
-    .region("asia-northeast3")
-    .firestore.document("/comments/{commentId}")
-    .onUpdate((snap) => {
-      const futures = [];
-      const after = snap.after;
-      futures.push(Comment.checkDelete(after));
-      return Promise.all(futures);
-    });
+  .region("asia-northeast3")
+  .firestore.document("/comments/{commentId}")
+  .onUpdate((snap) => {
+    const futures = [];
+    const after = snap.after;
+    futures.push(Comment.checkDelete(after));
+    return Promise.all(futures);
+  });
