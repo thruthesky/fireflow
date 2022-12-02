@@ -23,11 +23,10 @@ export const onUserUpdate = functions
     .firestore.document("/users/{uid}")
     .onUpdate((snap, context) => {
       const futures = [];
+      const data = snap.after.data() as UserDocument;
       futures.push(
-          User.updatePublicData(
-              context.params.uid,
-        snap.after.data() as UserDocument
-          )
+          User.updatePublicData(context.params.uid, data),
+          User.command(context.params.uid, data)
       );
       return Promise.all(futures);
     });

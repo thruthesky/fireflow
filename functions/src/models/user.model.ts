@@ -4,7 +4,6 @@ import { UserRecord } from "firebase-functions/v1/auth";
 import { UserDocument } from "../interfaces/user.interface";
 import { Ref } from "../utils/ref";
 
-
 /**
  * user_settings field name that will holds the boolean value
  * when user want to get notified if new comments is created under user created posts/comments
@@ -24,11 +23,11 @@ export class User {
   }
 
   /**
-* Create the profile document.
-* @param uid uid of the user
-* @param data data to update as the user profile
-*
-*/
+   * Create the profile document.
+   * @param uid uid of the user
+   * @param data data to update as the user profile
+   *
+   */
   static async create(uid: string, data: any): Promise<UserDocument | null> {
     data.created_time = admin.firestore.FieldValue.serverTimestamp();
     const user = await this.get(uid);
@@ -155,6 +154,33 @@ export class User {
   }
 
   /**
+   * Delete the user account.
+   * @param uid uid of the user
+   */
+  static async deleteAccount(uid: string) {
+    try {
+      await Ref.auth.deleteUser(uid);
+    } catch (e) {
+      //
+    }
+    try {
+      await Ref.userDoc(uid).delete();
+    } catch (e) {
+      console.log(e);
+    }
+    try {
+      await Ref.publicDoc(uid).delete();
+    } catch (e) {
+      console.log(e);
+    }
+    try {
+      await Ref.userSettingDoc(uid).delete();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  /**
    * Update user public data document.
    * @param uid user uid
    * @param data user document in /users/{uid}
@@ -186,6 +212,19 @@ export class User {
     );
   }
 
+  /**
+   * Run user command.
+   * @param uid user uid
+   * @param data user document
+   *
+   * If the command is `delete`, then the user's account will be deleted.
+   */
+  static command(uid: string, data: UserDocument) {
+    if (data.command == "delete") {
+      this.deleteAccount(uid);
+    }
+  }
+
   static increaseNoOfPosts(
       userDocumentReference: DocumentReference
   ): Promise<admin.firestore.WriteResult> {
@@ -213,9 +252,9 @@ export class User {
   static async setUserSettingsSubscription(
       uid: string,
       data: {
-      action?: string,
-      category?: string,
-      type?: string,
+      action?: string;
+      category?: string;
+      type?: string;
       [key: string]: any;
     }
   ): Promise<admin.firestore.WriteResult> {

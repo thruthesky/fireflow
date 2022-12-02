@@ -14,6 +14,7 @@
     "test:sendMessageWithTokens": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-tokens.ts",
     "test:sendMessageWithUids": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-uids.ts",
     "test:getAncestorsUid": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/comment/get-ancestors-uid.ts",
+    "test:send-chat-message": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/send-chat-message.ts",
     "test:welcome-message": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
     "test:post.check-delete": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/forum/post.check-delete.ts",
     "test:removetoken": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts"

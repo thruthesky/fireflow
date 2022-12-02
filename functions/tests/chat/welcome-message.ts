@@ -7,7 +7,7 @@ import { Setting } from "../../src/models/setting.model";
 
 describe("Chat - welcome message", () => {
   it("Send welcome message", async () => {
-    const re = await Chat.sendWelcomeMessage("9SIE4SCvLdOID7KICjwoou6k0yj2");
+    const re = await Chat.sendWelcomeMessage("fjsrDWnR8jZv3DMjLifKvAKJzgw2");
     expect(re).to.be.a("string");
 
     const room = await Chat.getRoom(re ?? "");

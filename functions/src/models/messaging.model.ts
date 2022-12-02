@@ -21,7 +21,7 @@ export class Messaging {
    * @param data information of sending message
    * @returns results
    */
-  static async sendMessage(data: any): Promise<any> {
+  static async sendMessage(data: SendMessage): Promise<any> {
     if (data.topic) {
       // / see TODO in README.md
     } else if (data.tokens) {
@@ -44,7 +44,7 @@ export class Messaging {
    *  'category' is the category of the post.
    * @returns
    */
-  static async sendMessageByAction(data: any) {
+  static async sendMessageByAction(data: SendMessage) {
     console.log(`sendMessageByAction(${JSON.stringify(data)})`);
 
     if (!data.action) {
@@ -56,7 +56,7 @@ export class Messaging {
 
     // commentCreate get post and patch data with category and title.
     if (data.action == EventName.commentCreate) {
-      const post = await Post.get(data.postDocumentReference.id);
+      const post = await Post.get(data.postDocumentReference!.id);
       uids.push(post.userDocumentReference.id); // post owner
       data.category = post.category;
       data.title = post.title;
@@ -64,7 +64,6 @@ export class Messaging {
       console.log("comment::post::", JSON.stringify(post));
       console.log("comment::data::", JSON.stringify(data));
     }
-
 
     // Get users who subscribed the subscription
     // TODO make this a function.
@@ -79,16 +78,16 @@ export class Messaging {
     // get uids
     if (snap.size != 0) {
       for (const doc of snap.docs) {
-        const d = doc.data() as UserSettingsDocument;
-        const uid = d.userDocumentReference.id;
-        if (uid != data.senderUid) uids.push(uid);
+        const s = doc.data() as UserSettingsDocument;
+        const uid = s.userDocumentReference.id;
+        if (uid != data.senderUserDocumentReference!.id) uids.push(uid);
       }
     }
     //
 
     // Get ancestor's uid
     if (data.action == EventName.commentCreate) {
-      const ancestors = await Comment.getAncestorsUid(data.id, data.uid);
+      const ancestors = await Comment.getAncestorsUid(data.id!, data.uid);
 
       // Remove ancestors who didn't subscribe for new comment.
       const subscribers = await this.getNewCommentNotificationUids(ancestors);
@@ -155,6 +154,7 @@ export class Messaging {
         settledIndex < settled.length;
         settledIndex++
       ) {
+        console.log(`settled[${settledIndex}]`, settled[settledIndex]);
         const value = (settled[settledIndex] as any).value;
         successCount += value.successCount;
         failureCount += value.failureCount;
@@ -301,18 +301,24 @@ export class Messaging {
     let parameterData = "";
     if (query.id && query.type == EventType.post) {
       initialPageName = "PostView";
-      parameterData = `{"postDocumentReference": "${Ref.postDoc(query.id!).path}", "postDocument": "${Ref.postDoc(query.id!).path}" }`;
-    } else if (query.senderUid && query.type == EventType.chat) {
+      parameterData = `{"postDocumentReference": "${
+        Ref.postDoc(query.id!).path
+      }", "postDocument": "${Ref.postDoc(query.id!).path}" }`;
+    } else if (query.type == EventType.chat) {
       // get user uid
       initialPageName = "ChatRoom";
-      parameterData = `{"otherUserDocumentReference": "${Ref.publicDoc(query.senderUid!).path}", "otherUserDocument": "${Ref.publicDoc(query.senderUid!).path}" }`;
+      parameterData = `{"otherUserDocument": "${
+        query.senderUserDocumentReference!.path
+      }", "chatRoomDocument": "${query.chatRoomDocumentReference!.path}" }`;
     }
 
     const res: MessagePayload = {
       data: {
         id: query.id ?? "",
         type: query.type ?? "",
-        senderUid: query.senderUid ?? query.uid ?? "",
+        senderUserDocumentReference:
+          query.senderUserDocumentReference?.path ?? "",
+        chatRoomDocumentReference: query.chatRoomDocumentReference!.path ?? "",
         badge: query.badge ?? "",
         initialPageName: initialPageName,
         parameterData: parameterData,
@@ -366,7 +372,7 @@ export class Messaging {
       res.apns.payload.aps["badge"] = parseInt(query.badge);
     }
 
-    console.log(`completePayload() return value: ${JSON.stringify(res)}`);
+    console.log(`--> completePayload() return value: ${JSON.stringify(res)}`);
 
     return res;
   }
@@ -395,16 +401,22 @@ export class Messaging {
     return re;
   }
 
-
+  /**
+   *
+   * @param data
+   * @returns
+   */
   static async sendChatNotificationToOtherUser(data: ChatMessageDocument) {
-    const senderSnap = await Ref.publicDoc(data.senderUserDocumentReference.id).get();
-    const sendMessage = {
+    const user = await User.get(data.senderUserDocumentReference.id);
+    const messageData: SendMessage = {
+      ...data,
       type: EventType.chat,
-      title: `${senderSnap.get("display_name") ?? ""} send you a message.`,
+      title: `${user?.display_name ?? ""} send you a message.`,
       body: data.text,
-      senderUid: data.senderUserDocumentReference.id,
-      uids: await Chat.getOtherUserUidFromChatMessageDocument(data),
-    } as SendMessage;
-    return this.sendMessage(sendMessage);
+      uids: await Chat.getOtherUserUidsFromChatMessageDocument(data),
+      chatRoomDocumentReference: data.chatRoomDocumentReference,
+      senderUserDocumentReference: data.senderUserDocumentReference,
+    };
+    return this.sendMessage(messageData);
   }
 }
