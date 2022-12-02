@@ -51,6 +51,8 @@
   - [코멘트](#코멘트)
     - [글 삭제](#글-삭제)
 - [채팅](#채팅)
+- [Storage and Uploads](#storage-and-uploads)
+  - [Reference to the object](#reference-to-the-object)
 - [보안](#보안)
 - [Test codes](#test-codes)
   - [lab folder](#lab-folder)
@@ -396,6 +398,30 @@ erDiagram
 
 - 플러터플로에서 제공하는 기본 채팅 기능이 좋지 않아서, 새로 제작을 해서 사용한다.
 - 새로운 메시지가 작성되면 상대방에게 푸시 알림을 보낸다.
+
+
+
+# Storage and Uploads
+
+
+
+
+## Reference to the object
+
+
+- When an image (or file) is uploaded, the backend will update the metadata where it is connected to.
+
+- When a user updates documents that has uploaded photos(files), the background function works.
+  - For instance, when one of these event - `onPostCreate, onPostUpdate, onCommentCreate, onCommentUpdate, onUserUpdate` happens, it will call `Storage.updateTargetReference()` in `storage.mode.ts` to update the `targetReeference` which is the reference of the uploaded file.
+  - the `targetReference` of metadata is a string of document path.
+
+- The added metadata are
+  - `targetReferencePath` - The path of the document that the uploaded file belongs to.
+  - `collectionName` - The first part of the `targetReferencePath`. It may be `posts`, `comments`, `users_public_data`, `chat_room_message`. To look for the complete document path that the uploaded image is connected to, refer `targetReferencePath`.
+  - `documentId` - The document ID of `targetReferencePath`
+  - `type` - is the type of the uploaded image. It can be `profilePhoto` or `coverPhoto`.
+  
+
 
 # 보안
 

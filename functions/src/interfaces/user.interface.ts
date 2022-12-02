@@ -6,7 +6,8 @@ export interface UserDocument {
   phone_number?: string;
   email?: string;
   created_time: admin.firestore.Timestamp;
-  photo_url: string;
+  photo_url?: string;
+  coverPhotoUrl?: string;
   gender: string;
   birth_date: admin.firestore.Timestamp;
   blockedUserList?: Array<DocumentReference>;

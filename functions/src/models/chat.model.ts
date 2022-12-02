@@ -28,7 +28,7 @@ export class Chat {
    * 그래서 set(merge: true) 로 채팅방을 업데이트 하는 것이다.
    */
   static async updateRoom(
-    data: ChatMessageDocument
+      data: ChatMessageDocument
   ): Promise<admin.firestore.WriteResult> {
     // 채팅방 정보 업데이트
     const info: ChatRoomDocument = {
@@ -73,12 +73,12 @@ export class Chat {
   }
 
   static async getOtherUserUidsFromChatMessageDocument(
-    data: ChatMessageDocument
+      data: ChatMessageDocument
   ): Promise<string> {
     const chatRoomDoc = await data.chatRoomDocumentReference.get();
     const chatRoomData = chatRoomDoc.data() as ChatRoomDocument;
     const refs = chatRoomData.users.filter(
-      (ref) => ref !== data.senderUserDocumentReference
+        (ref) => ref !== data.senderUserDocumentReference
     );
 
     return refs.map((ref) => ref.id).join(",");

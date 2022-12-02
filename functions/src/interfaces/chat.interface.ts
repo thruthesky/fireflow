@@ -5,6 +5,7 @@ export interface ChatMessageDocument {
   senderUserDocumentReference: admin.firestore.DocumentReference;
   text: string;
   timestamp: admin.firestore.Timestamp;
+  photo_url?: string;
 }
 
 export interface ChatRoomDocument {
