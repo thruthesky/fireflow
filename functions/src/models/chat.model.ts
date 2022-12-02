@@ -38,6 +38,7 @@ export class Chat {
       last_message_seen_by: [data.senderUserDocumentReference],
     } as ChatRoomDocument;
     // 1:1 채팅이면, users 배열 추가. (웰컴 메시지에서 필요)
+    // 검토, 어쩌면, 웰컴 메시지의 경우, 따로 로직을 분리하는 것이 필요할 수 있겠다.
     if (data.chatRoomDocumentReference.id.indexOf("-") > 0) {
       const arr = data.chatRoomDocumentReference.id.split("-");
       info.users = [Ref.userDoc(arr[0]), Ref.userDoc(arr[1])];
