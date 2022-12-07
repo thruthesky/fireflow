@@ -9,7 +9,7 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy:functions": "eslint --fix --ext .js,.ts . && npm run deploy",
-    "deploy": "firebase deploy --only functions:onUserCreate,functions:onUserUpdate,functions:onPostCreate,functions:onPostUpdate,functions:onCommentCreate,functions:onCommentUpdate,functions:onChatMessageCreate,functions:sendMessage,functions:messagingOnPostCreate,functions:messagingOnCommentCreate,functions:pushNotificationQueue,functions:messagingOnChatMessageCreate,functions:onUserStatusChanged",
+    "deploy": "firebase deploy --only functions:onUserCreate,functions:onUserUpdate,functions:onPostCreate,functions:onPostUpdate,functions:onCommentCreate,functions:onCommentUpdate,functions:onChatMessageCreate,functions:messagingOnPostCreate,functions:messagingOnCommentCreate,functions:pushNotificationQueue,functions:messagingOnChatMessageCreate,functions:onUserStatusChanged",
     "logs": "firebase functions:log",
     "test:sendMessageWithActions": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-actions.ts",
     "test:sendMessageWithTokens": "mocha  --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-with-tokens.ts",
