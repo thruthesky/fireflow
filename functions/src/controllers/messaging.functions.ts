@@ -61,7 +61,7 @@ export const messagingOnChatMessageCreate = functions
     const futures = [];
 
     futures.push(
-      Messaging.sendChatNotificationToOtherUser(
+      Messaging.sendChatNotificationToOtherUsers(
         snap.data() as ChatMessageDocument
       )
     );

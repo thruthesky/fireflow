@@ -28,7 +28,7 @@ export class Chat {
    * 채팅 방의 사용자 추가, 삭제는 클라이언트에서 이루어져야 한다.
    */
   static async updateRoom(
-      data: ChatMessageDocument
+    data: ChatMessageDocument
   ): Promise<admin.firestore.WriteResult> {
     // 채팅방 정보 업데이트
     const info: ChatRoomDocument = {
@@ -83,18 +83,19 @@ export class Chat {
 
   /**
    * 채팅 메시지를 받아서, 채팅방 정보를 보고, 현재 메시지를 보낸 사용자를 제외한 나머지 사용자들의 UID 를 리턴한다.
+   * 이 때, 채팅방 푸시 알림을 Disable(Off) 한 사용자는 빼고 메시지를 전달한다.
    * @param data chat room message document
    * @returns array of other user uids
    */
   static async getOtherUserUidsFromChatMessageDocument(
-      data: ChatMessageDocument
+    data: ChatMessageDocument
   ): Promise<string> {
     const chatRoomDoc = await data.chatRoomDocumentReference.get();
     const chatRoomData = chatRoomDoc.data() as ChatRoomDocument;
-    const refs = chatRoomData.users.filter(
-        (ref) => ref !== data.senderUserDocumentReference
-    );
+    const refs = chatRoomData.users
+      .filter((ref) => ref.id !== data.senderUserDocumentReference.id)
+      .map((ref) => ref.id);
 
-    return refs.map((ref) => ref.id).join(",");
+    return refs.join(",");
   }
 }

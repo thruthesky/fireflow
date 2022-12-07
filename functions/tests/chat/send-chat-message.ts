@@ -27,7 +27,7 @@ describe("Chat - send a message", () => {
 
     // expect(WriteResult).to.be.an("object");
 
-    await Messaging.sendChatNotificationToOtherUser(data);
+    await Messaging.sendChatNotificationToOtherUsers(data);
 
     expect(true).to.be.true;
   });

@@ -19,7 +19,8 @@
     "test:welcome-message": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
     "test:post.check-delete": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/forum/post.check-delete.ts",
     "test:removetoken": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
-    "test:upload:update-target-reference": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/upload/update-target-reference.spec.ts"
+    "test:upload:update-target-reference": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/upload/update-target-reference.spec.ts",
+    "test:getOtherUserUidsFromChatMessageDocument": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/getOtherUserUidsFromChatMessageDocument.ts"
   },
   "engines": {
     "node": "16"
