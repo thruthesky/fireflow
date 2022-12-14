@@ -26,6 +26,7 @@
 - [커뮤니티 기능 플로우챠트](#커뮤니티-기능-플로우챠트)
 - [Firestore DB 구조](#firestore-db-구조)
   - [Firestore Indexes](#firestore-indexes)
+- [Coding guideline](#coding-guideline)
 - [시스템 설정](#시스템-설정)
   - [How to set a user as admin](#how-to-set-a-user-as-admin)
   - [헬퍼 사용자 지정](#헬퍼-사용자-지정)
@@ -75,6 +76,10 @@
 * 백엔드 관련된 내용 참고
   * Cloud function 의 Firestore background functions 에서는 `context.auth` 를 사용 할 수 없다. 그래서 항상 userDocumentReference 에서 글 쓴이 문서 ref 를 전달해 주어야 한다.
   * 또한 백엔드에서 업데이트하는 데이터(필드)는 한박자 늦을 수 있다. 그래서 `createdAt` 과 같이, 목록에서 정렬할 때 사용되는 변수는 처음 저장 할 때, 같이 저장 해 주어야 한다. (그렇지 않으면 목록에 바로 나오지 않을 수 있다.)
+
+
+
+
 
 
 # 기능
@@ -146,6 +151,12 @@ flowchart TD
 ## Firestore Indexes
 
 - We don't use any of the security rules from FF. Instead, we defined our own Firestore security rules.
+
+
+# Coding guideline
+
+- Don't update one document twice on a backend trigger.
+
 
 # 시스템 설정
 
@@ -279,7 +290,7 @@ flowchart TD
 
 ### Feeds logic
 
-- When a user creates a post, get recent latest 20 posts and save the post documnet ID with the timestamp of createdAt in `/users_public_data/<uid> { recentPosts: [ { ... }, { ... }] }`.
+- When a user creates a post, get recent latest 20 posts and save the post documnet ID with the timestamp of createdAt in `/users_public_data/<uid> { recentPosts: [ { id: postId, timestamp: ... }, { ... }] }`.
   - No need to update(shift and push) the `recentPosts`. Getting 20 posts may seem expensive but the post creation event won't happen often. So, it would be fine.
   - Note, the timestamp is saved as unix timestamp. So, it will be easier to compare/sort the posts when they are merged.
   - Note, the post document ID is saved as ID string. Not as in post reference.
@@ -288,8 +299,7 @@ flowchart TD
   - get the `/users_public_data` user document of following users (using `Array contains`) which has `recentPosts`
   - and merge them by createAt and display.
 
-- Note, sometimes in rear case, the last post that the user just created does not appear in `recentPosts`. (Is it the nature of firestore? that, somehow in `onCreate` event, it cannot get the created document immediately?)
-
+- Note, sometimes in rear case, the last post that the user just created does not appear in `recentPosts`.
 
 # Chat
 
