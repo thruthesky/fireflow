@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import { DocumentReference } from "firebase-admin/firestore";
 import { UserRecord } from "firebase-functions/v1/auth";
+import { PostDocument } from "../interfaces/forum.interface";
 import { UserDocument } from "../interfaces/user.interface";
 import { Ref } from "../utils/ref";
 
@@ -260,5 +261,35 @@ export class User {
   ): Promise<admin.firestore.WriteResult> {
     data["userDocumentReference"] = Ref.userDoc(uid);
     return Ref.userSettingDoc(uid).set(data, { merge: true });
+  }
+
+  /**
+   * Update recent posts of the user in /users_public_data/{uid}/recentPosts.
+   * @param userDocumentReference the user document reference of the user who posted the post  in /users collection.
+   * @returns Promise
+   */
+  static async updateRecentPosts(
+      userDocumentReference: DocumentReference
+  ): Promise<undefined> {
+    // get the last 20 post documents from /posts collection order by createdAt descending.
+    const snapshot = await Ref.postCol
+        .where("userDocumentReference", "==", userDocumentReference)
+        .orderBy("createdAt", "desc")
+        .limit(20)
+        .get();
+
+    // return if there is no post document.
+    if (snapshot.empty) return;
+
+    const recentPosts = [];
+    for (const doc of snapshot.docs) {
+      const data = doc.data() as PostDocument;
+      recentPosts.push({ [doc.id]: data.createdAt.seconds });
+    }
+
+    // update the recentPosts field in /users_public_data/{uid} document.
+    await userDocumentReference.update({ recentPosts });
+
+    return;
   }
 }

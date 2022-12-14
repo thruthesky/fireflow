@@ -279,12 +279,16 @@ flowchart TD
 
 ### Feeds logic
 
-- When a user creates a post, get recent latest 20 posts and save the post documnet ID with createdAt in `/users_public_data/<uid> { recentPosts: [ { ... }, { ... }] }`.
+- When a user creates a post, get recent latest 20 posts and save the post documnet ID with the timestamp of createdAt in `/users_public_data/<uid> { recentPosts: [ { ... }, { ... }] }`.
   - No need to update(shift and push) the `recentPosts`. Getting 20 posts may seem expensive but the post creation event won't happen often. So, it would be fine.
+  - Note, the timestamp is saved as unix timestamp. So, it will be easier to compare/sort the posts when they are merged.
+  - Note, the post document ID is saved as ID string. Not as in post reference.
 
 - When the app displays feeds of following users,
   - get the `/users_public_data` user document of following users (using `Array contains`) which has `recentPosts`
   - and merge them by createAt and display.
+
+- Note, sometimes in rear case, the last post that the user just created does not appear in `recentPosts`. (Is it the nature of firestore? that, somehow in `onCreate` event, it cannot get the created document immediately?)
 
 
 # Chat
