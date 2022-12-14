@@ -14,4 +14,5 @@ export interface ChatRoomDocument {
   last_message_sent_by: admin.firestore.DocumentReference;
   last_message_timestamp: admin.firestore.Timestamp;
   users: Array<admin.firestore.DocumentReference>;
+  notificationDisabledUsers: Array<admin.firestore.DocumentReference>;
 }

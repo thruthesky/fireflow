@@ -102,6 +102,11 @@ export class Ref {
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return this.chatRoomsCol.doc(docId);
   }
+  static chatRoomDoc(
+      docId: string
+  ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
+    return this.chatRoomsDoc(docId);
+  }
 
   static get chatRoomMessagesCol() {
     return this.db.collection("chat_room_messages");
