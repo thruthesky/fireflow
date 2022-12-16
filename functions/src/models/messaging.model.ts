@@ -1,6 +1,10 @@
 import * as admin from "firebase-admin";
 import { EventName, EventType } from "../utils/event-name";
-import { MessagePayload, SendMessage, SendMessageToDocument } from "../interfaces/messaging.interface";
+import {
+  MessagePayload,
+  SendMessage,
+  SendMessageToDocument,
+} from "../interfaces/messaging.interface";
 import { Ref } from "../utils/ref";
 import { Library } from "../utils/library";
 
@@ -13,7 +17,6 @@ import { Chat } from "./chat.model";
 
 import * as functions from "firebase-functions";
 import { MulticastMessage } from "firebase-admin/lib/messaging/messaging-api";
-
 
 export class Messaging {
   /**
@@ -72,10 +75,10 @@ export class Messaging {
     // Get users who subscribed the subscription
     // TODO make this a function.
     const snap = await Ref.db
-        .collection("user_settings")
-        .where("action", "==", data.action)
-        .where("category", "==", data.category)
-        .get();
+      .collection("user_settings")
+      .where("action", "==", data.action)
+      .where("category", "==", data.category)
+      .get();
 
     console.log("snap.size", snap.size);
 
@@ -116,8 +119,8 @@ export class Messaging {
    * @param data data to send push notification.
    */
   static async sendMessageToTokens(
-      tokens: string[],
-      data: any
+    tokens: string[],
+    data: any
   ): Promise<{ success: number; error: number }> {
     console.log(`sendMessageToTokens() token.length: ${tokens.length}`);
     if (tokens.length == 0) {
@@ -139,8 +142,8 @@ export class Messaging {
     // Save [sendMulticast()] into a promise.
     for (const _500Tokens of chunks) {
       const newPayload: admin.messaging.MulticastMessage = Object.assign(
-          {},
-          { tokens: _500Tokens },
+        {},
+        { tokens: _500Tokens },
         payload as any
       );
       multicastPromise.push(admin.messaging().sendMulticast(newPayload));
@@ -186,8 +189,8 @@ export class Messaging {
       return results;
     } catch (e) {
       console.log(
-          "---> caught on sendMessageToTokens() await Promise.allSettled()",
-          e
+        "---> caught on sendMessageToTokens() await Promise.allSettled()",
+        e
       );
       throw e;
     }
@@ -206,16 +209,16 @@ export class Messaging {
     const promises: Promise<any>[] = [];
     for (const token of tokens) {
       promises.push(
-          // Get the document of the token
-          Ref.db
-              .collectionGroup("fcm_tokens")
-              .where("fcm_token", "==", token)
-              .get()
-              .then(async (snapshot) => {
-                for (const doc of snapshot.docs) {
-                  await doc.ref.delete();
-                }
-              })
+        // Get the document of the token
+        Ref.db
+          .collectionGroup("fcm_tokens")
+          .where("fcm_token", "==", token)
+          .get()
+          .then(async (snapshot) => {
+            for (const doc of snapshot.docs) {
+              await doc.ref.delete();
+            }
+          })
       );
     }
     await Promise.all(promises);
@@ -288,9 +291,9 @@ export class Messaging {
 
     if (!query.body) {
       console.log(
-          `completePayload() throws error: body-is-empty: (${JSON.stringify(
-              query
-          )})`
+        `completePayload() throws error: body-is-empty: (${JSON.stringify(
+          query
+        )})`
       );
       throw Error("body-is-empty");
     }
@@ -305,12 +308,14 @@ export class Messaging {
     let parameterData = "";
     if (query.id && query.type == EventType.post) {
       initialPageName = "PostView";
-      parameterData = `{"postDocumentReference": "${Ref.postDoc(query.id!).path
+      parameterData = `{"postDocumentReference": "${
+        Ref.postDoc(query.id!).path
       }", "postDocument": "${Ref.postDoc(query.id!).path}" }`;
     } else if (query.type == EventType.chat) {
       // get user uid
       initialPageName = "ChatRoom";
-      parameterData = `{"otherUserDocument": "${Ref.publicDoc(query.senderUserDocumentReference!.id).path
+      parameterData = `{"otherUserDocument": "${
+        Ref.publicDoc(query.senderUserDocumentReference!.id).path
       }", "chatRoomDocument": "${query.chatRoomDocumentReference!.path}" }`;
     }
 
@@ -384,7 +389,7 @@ export class Messaging {
    * @returns array of uid
    */
   static async getNewCommentNotificationUids(
-      uids: string[]
+    uids: string[]
   ): Promise<string[]> {
     if (uids.length === 0) return [];
     const promises: Promise<boolean>[] = [];
@@ -420,8 +425,9 @@ export class Messaging {
     return this.sendMessage(messageData);
   }
 
-
-  static async sendPushNotifications(snapshot: functions.firestore.QueryDocumentSnapshot) {
+  static async sendPushNotifications(
+    snapshot: functions.firestore.QueryDocumentSnapshot
+  ) {
     const data = snapshot.data() as SendMessageToDocument;
     const title = data.title || "";
     const body = data.body || "";
@@ -430,11 +436,7 @@ export class Messaging {
     const parameterData = data.parameter_data || "";
     const targetAudience = data.target_audience || "";
     const initialPageName = data.initial_page_name || "";
-    const userRefsStr = data.user_refs || "";
-    const batchIndex = data.batch_index || 0;
-    const numBatches = data.num_batches || 0;
     const status = data.status || "";
-
 
     //
     if (status !== "" && status !== "started") {
@@ -444,52 +446,41 @@ export class Messaging {
 
     if (title === "" || body === "") {
       console.log(`Title: ${title} or Body: ${body} are empty`);
-      await snapshot.ref.update({ status: "failed", error: `Title: ${title} or Body: ${body} are empty` });
+      await snapshot.ref.update({
+        status: "failed",
+        error: `Title: ${title} or Body: ${body} are empty`,
+      });
       return;
     }
 
-    const userRefs = userRefsStr === "" ? [] : userRefsStr.trim().split(",");
     const tokens = new Set();
-    if (userRefsStr) {
-      for (const userRef of userRefs) {
-        const userTokens = await Ref
-            .db
-            .doc(userRef)
-            .collection("fcm_tokens")
-            .get();
-        userTokens.docs.forEach((token) => {
-          if (typeof token.data().fcm_token !== undefined) {
-            tokens.add(token.data().fcm_token);
-          }
-        });
-      }
-    } else {
-      // Handle batched push notifications by splitting tokens up by document
-      // id.
-      let userTokens: admin.firestore.QuerySnapshot<admin.firestore.DocumentData>;
-      if (numBatches > 0) {
-        userTokens = await Ref.tokenCollectionGroup
-            .orderBy(admin.firestore.FieldPath.documentId())
-            .startAt(this.getDocIdBound(batchIndex, numBatches))
-            .endBefore(this.getDocIdBound(batchIndex + 1, numBatches)).get();
-      } else {
-        userTokens = await Ref.tokenCollectionGroup.get();
-      }
 
-      userTokens.docs.forEach((token) => {
-        const data = token.data();
-        const audienceMatches =
-          targetAudience === "All" || data.device_type === targetAudience;
-        if (audienceMatches || typeof data.fcm_token !== undefined) {
-          tokens.add(data.fcm_token);
-        }
-      });
-    }
+    // Send message to specific users by `user_refs` option.
+    // Note, that we don't use `user_refs` option anymore, but we keep it here for the posibility to enable in the future.
+
+    // Send message to all user
+    // Note, we don't send by `batch` while FF deos it.
+
+    // Get tokens of all users.
+    let userTokens: admin.firestore.QuerySnapshot<admin.firestore.DocumentData>;
+    userTokens = await Ref.tokenCollectionGroup.get();
+
+    userTokens.docs.forEach((token) => {
+      const data = token.data();
+      const audienceMatches =
+        targetAudience === "All" || data.device_type === targetAudience;
+      if (audienceMatches || typeof data.fcm_token !== undefined) {
+        tokens.add(data.fcm_token);
+      }
+    });
 
     const tokensArr = Array.from(tokens);
     const messageBatches = [];
     for (let i = 0; i < tokensArr.length; i += 500) {
-      const tokensBatch = tokensArr.slice(i, Math.min(i + 500, tokensArr.length));
+      const tokensBatch = tokensArr.slice(
+        i,
+        Math.min(i + 500, tokensArr.length)
+      );
       const messages = {
         notification: {
           title,
@@ -519,40 +510,14 @@ export class Messaging {
 
     let numSent = 0;
     await Promise.all(
-        messageBatches.map(async (messages) => {
-          const response = await admin.messaging().sendMulticast(messages as MulticastMessage);
-          numSent += response.successCount;
-        })
+      messageBatches.map(async (messages) => {
+        const response = await admin
+          .messaging()
+          .sendMulticast(messages as MulticastMessage);
+        numSent += response.successCount;
+      })
     );
 
     await snapshot.ref.update({ status: "succeeded", num_sent: numSent });
-  }
-
-  static getDocIdBound(index: number, numBatches: number) {
-    if (index <= 0) {
-      return "users/(";
-    }
-    if (index >= numBatches) {
-      return "users/}";
-    }
-    const numUidChars = 62;
-    const twoCharOptions = Math.pow(numUidChars, 2);
-
-    const twoCharIdx = (index * twoCharOptions) / numBatches;
-    const firstCharIdx = Math.floor(twoCharIdx / numUidChars);
-    const secondCharIdx = Math.floor(twoCharIdx % numUidChars);
-    const firstChar = this.getCharForIndex(firstCharIdx);
-    const secondChar = this.getCharForIndex(secondCharIdx);
-    return "users/" + firstChar + secondChar;
-  }
-
-  static getCharForIndex(charIdx: number) {
-    if (charIdx < 10) {
-      return String.fromCharCode(charIdx + "0".charCodeAt(0));
-    } else if (charIdx < 36) {
-      return String.fromCharCode("A".charCodeAt(0) + charIdx - 10);
-    } else {
-      return String.fromCharCode("a".charCodeAt(0) + charIdx - 36);
-    }
   }
 }
