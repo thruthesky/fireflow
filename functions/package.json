@@ -21,7 +21,8 @@
     "test:removetoken": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/welcome-message.ts",
     "test:upload:update-target-reference": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/upload/update-target-reference.spec.ts",
     "test:getOtherUserUidsFromChatMessageDocument": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/chat/getOtherUserUidsFromChatMessageDocument.ts",
-    "test:push:test": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-to-a-token.spec.ts"
+    "test:push:test": "mocha --timeout 10000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-message-to-a-token.spec.ts",
+    "test:send-push-notification-user-refs": "mocha --timeout 200000 --require ts-node/register --watch --watch-files src/**/*.ts,tests/**/*.ts tests/messaging/send-push-notification-user-refs.ts"
   },
   "engines": {
     "node": "16"

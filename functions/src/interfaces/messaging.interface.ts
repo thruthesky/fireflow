@@ -82,7 +82,6 @@ export interface MessagePayload {
 }
 
 
-
 export interface SendMessageToDocument {
   title?: string;
   body?: string;
