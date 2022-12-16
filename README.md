@@ -31,6 +31,7 @@
   - [How to set a user as admin](#how-to-set-a-user-as-admin)
   - [헬퍼 사용자 지정](#헬퍼-사용자-지정)
 - [사용자](#사용자)
+  - [Database structure of /users and /users\_public\_data](#database-structure-of-users-and-users_public_data)
 - [가입 환영 인사](#가입-환영-인사)
 - [게시판](#게시판)
   - [카테고리](#카테고리)
@@ -210,6 +211,15 @@ flowchart TD
 
 
 
+## Database structure of /users and /users_public_data
+
+
+- `recentPosts` has the most 20 recent posts that the user created.
+- `lastPostCreatedAt` has the time that the user created last post.
+  - This may be used to list feeds(posts) recent three posts of the users that I follow by ordering `lastPostCreateAt` with limit 3.
+    If `lastPostCreatedAt` does not exists, then the app needs to merge all the `recentPosts` after reading all the following users.
+- `noOfPsots` has the number of posts that the user has created so far.
+
 
 # 가입 환영 인사
 
@@ -292,7 +302,7 @@ flowchart TD
 
 - When a user creates a post, get recent latest 20 posts and save the post documnet ID with the timestamp of createdAt in `/users_public_data/<uid> { recentPosts: [ { id: postId, timestamp: ... }, { ... }] }`.
   - No need to update(shift and push) the `recentPosts`. Getting 20 posts may seem expensive but the post creation event won't happen often. So, it would be fine.
-  - Note, the timestamp is saved as unix timestamp. So, it will be easier to compare/sort the posts when they are merged.
+  - Note, the timestamp is saved as integer in unix timestamp format. So, it will consume less space in document and be easier to compare/sort the posts when they are merged.
   - Note, the post document ID is saved as ID string. Not as in post reference.
 
 - When the app displays feeds of following users,

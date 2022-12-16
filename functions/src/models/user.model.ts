@@ -18,7 +18,7 @@ const notifyNewComments = "notify-new-comments";
  */
 export class User {
   static publicDoc(
-    uid: string
+      uid: string
   ): admin.firestore.DocumentReference<admin.firestore.DocumentData> {
     return Ref.publicDoc(uid);
   }
@@ -60,11 +60,11 @@ export class User {
   static async commentNotification(uid: string): Promise<boolean> {
     const userPath = Ref.userDoc(uid).path;
     const querySnapshot = await Ref.userSettings
-      .where("userDocumentReference", "==", userPath)
-      .where("type", "==", "settings")
-      .where(notifyNewComments, "==", true)
-      .limit(1)
-      .get();
+        .where("userDocumentReference", "==", userPath)
+        .where("type", "==", "settings")
+        .where(notifyNewComments, "==", true)
+        .limit(1)
+        .get();
 
     if (querySnapshot.size == 0) return false;
     // const data = querySnapshot.docs[0].data();
@@ -87,7 +87,7 @@ export class User {
   // }
 
   static async getUserByPhoneNumber(
-    phoneNumber: string
+      phoneNumber: string
   ): Promise<UserRecord | null> {
     try {
       const UserRecord = await Ref.auth.getUserByPhoneNumber(phoneNumber);
@@ -134,8 +134,8 @@ export class User {
    * @param otherUid is the user uid to be disabled.
    */
   static async disableUser(
-    adminUid: string,
-    otherUid: string
+      adminUid: string,
+      otherUid: string
   ): Promise<UserRecord> {
     this.checkAdmin(adminUid);
     const user = await Ref.auth.updateUser(otherUid, { disabled: true });
@@ -188,8 +188,8 @@ export class User {
    * @return promise of write result
    */
   static updatePublicData(
-    uid: string,
-    data: UserDocument
+      uid: string,
+      data: UserDocument
   ): Promise<admin.firestore.WriteResult> {
     const hasPhoto = !!data.photo_url;
     let complete = false;
@@ -202,14 +202,14 @@ export class User {
     delete data.phone_number;
     delete data.blockedUserList;
     return User.publicDoc(uid).set(
-      {
-        ...data,
-        isProfileComplete: complete,
-        userDocumentReference: Ref.userDoc(uid),
-        hasPhoto: hasPhoto,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
+        {
+          ...data,
+          isProfileComplete: complete,
+          userDocumentReference: Ref.userDoc(uid),
+          hasPhoto: hasPhoto,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
     );
   }
 
@@ -227,7 +227,7 @@ export class User {
   }
 
   static increaseNoOfComments(
-    userDocumentReference: DocumentReference
+      userDocumentReference: DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return userDocumentReference.update({
       noOfComments: admin.firestore.FieldValue.increment(1),
@@ -243,8 +243,8 @@ export class User {
   }
 
   static async setUserSettingsSubscription(
-    uid: string,
-    data: {
+      uid: string,
+      data: {
       action?: string;
       category?: string;
       type?: string;
@@ -261,7 +261,7 @@ export class User {
    * @returns
    */
   static increaseNoOfPosts(
-    userDocumentReference: DocumentReference
+      userDocumentReference: DocumentReference
   ): Promise<admin.firestore.WriteResult> {
     return userDocumentReference.update({
       noOfPosts: admin.firestore.FieldValue.increment(1),
@@ -278,14 +278,14 @@ export class User {
    * @returns Promise
    */
   static async updateUserPostMeta(
-    userDocumentReference: DocumentReference
+      userDocumentReference: DocumentReference
   ): Promise<undefined> {
     // get the last 20 post documents from /posts collection order by createdAt descending.
     const snapshot = await Ref.postCol
-      .where("userDocumentReference", "==", userDocumentReference)
-      .orderBy("createdAt", "desc")
-      .limit(20)
-      .get();
+        .where("userDocumentReference", "==", userDocumentReference)
+        .orderBy("createdAt", "desc")
+        .limit(20)
+        .get();
 
     // return if there is no post document.
     if (snapshot.empty) return;
@@ -300,6 +300,7 @@ export class User {
     await Ref.publicDoc(userDocumentReference.id).update({
       noOfPosts: admin.firestore.FieldValue.increment(1),
       recentPosts,
+      lastPostCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     return;
