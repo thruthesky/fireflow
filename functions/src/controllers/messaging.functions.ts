@@ -1,10 +1,17 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { RuntimeOptions } from "firebase-functions";
 import { ChatMessageDocument } from "../interfaces/chat.interface";
 import { CommentDocument, PostDocument } from "../interfaces/forum.interface";
 import { SendMessage } from "../interfaces/messaging.interface";
 import { Messaging } from "../models/messaging.model";
 import { EventName, EventType } from "../utils/event-name";
+
+
+const pushNotificationRuntimeOpts: RuntimeOptions = {
+  timeoutSeconds: 540,
+  memory: "2GB",
+};
 
 export const messagingOnPostCreate = functions
     .region("asia-northeast3")
@@ -66,4 +73,18 @@ export const messagingOnChatMessageCreate = functions
           )
       );
       return Promise.all(futures);
+    });
+
+
+export const sendPushNotificationsOnCreate = functions
+    .region("asia-northeast3")
+    .runWith(pushNotificationRuntimeOpts)
+    .firestore.document("send_push_notifications/{documentId}")
+    .onCreate(async (snapshot) => {
+      try {
+        await Messaging.sendPushNotifications(snapshot);
+      } catch (e) {
+        console.log(`Error: ${e}`);
+        await snapshot.ref.update({ status: "failed", error: `${e}` });
+      }
     });

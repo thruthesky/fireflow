@@ -113,6 +113,9 @@ export class Ref {
   }
 
   /** ****************************** MESSAGING References ****************************/
+  static get tokenCollectionGroup() {
+    return Ref.db.collectionGroup("fcm_tokens");
+  }
 
   static tokenCol(uid: string): admin.firestore.CollectionReference {
     return this.userDoc(uid).collection("fcm_tokens");

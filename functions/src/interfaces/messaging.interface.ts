@@ -80,3 +80,19 @@ export interface MessagePayload {
     };
   };
 }
+
+
+export interface SendMessageToDocument {
+  title?: string;
+  body?: string;
+  image_url?: string;
+  sound?: string;
+  parameter_data?: string;
+  target_audience?: string;
+  initial_page_name?: string;
+  user_refs?: string;
+  status?: string;
+  error?: string;
+  batch_index?: number;
+  num_batches?: number;
+}

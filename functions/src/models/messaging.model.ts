@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import { EventName, EventType } from "../utils/event-name";
-import { MessagePayload, SendMessage } from "../interfaces/messaging.interface";
+import { MessagePayload, SendMessage, SendMessageToDocument } from "../interfaces/messaging.interface";
 import { Ref } from "../utils/ref";
 import { Library } from "../utils/library";
 
@@ -10,6 +10,10 @@ import { Post } from "./post.model";
 import { UserSettingsDocument } from "../interfaces/user.interface";
 import { ChatMessageDocument } from "../interfaces/chat.interface";
 import { Chat } from "./chat.model";
+
+import * as functions from "firebase-functions";
+import { MulticastMessage } from "firebase-admin/lib/messaging/messaging-api";
+
 
 export class Messaging {
   /**
@@ -301,14 +305,12 @@ export class Messaging {
     let parameterData = "";
     if (query.id && query.type == EventType.post) {
       initialPageName = "PostView";
-      parameterData = `{"postDocumentReference": "${
-        Ref.postDoc(query.id!).path
+      parameterData = `{"postDocumentReference": "${Ref.postDoc(query.id!).path
       }", "postDocument": "${Ref.postDoc(query.id!).path}" }`;
     } else if (query.type == EventType.chat) {
       // get user uid
       initialPageName = "ChatRoom";
-      parameterData = `{"otherUserDocument": "${
-        Ref.publicDoc(query.senderUserDocumentReference!.id).path
+      parameterData = `{"otherUserDocument": "${Ref.publicDoc(query.senderUserDocumentReference!.id).path
       }", "chatRoomDocument": "${query.chatRoomDocumentReference!.path}" }`;
     }
 
@@ -340,13 +342,13 @@ export class Messaging {
       },
       android: {
         notification: {
-          sound: "default_sound.wav",
+          sound: "default",
         },
       },
       apns: {
         payload: {
           aps: {
-            sound: "default_sound.wav",
+            sound: "default",
           },
         },
       },
@@ -416,5 +418,141 @@ export class Messaging {
       senderUserDocumentReference: data.senderUserDocumentReference,
     };
     return this.sendMessage(messageData);
+  }
+
+
+  static async sendPushNotifications(snapshot: functions.firestore.QueryDocumentSnapshot) {
+    const data = snapshot.data() as SendMessageToDocument;
+    const title = data.title || "";
+    const body = data.body || "";
+    const imageUrl = data.image_url || "";
+    const sound = data.sound || "";
+    const parameterData = data.parameter_data || "";
+    const targetAudience = data.target_audience || "";
+    const initialPageName = data.initial_page_name || "";
+    const userRefsStr = data.user_refs || "";
+    const batchIndex = data.batch_index || 0;
+    const numBatches = data.num_batches || 0;
+    const status = data.status || "";
+
+
+    //
+    if (status !== "" && status !== "started") {
+      console.log(`Already processed ${snapshot.ref.path}. Skipping...`);
+      return;
+    }
+
+    if (title === "" || body === "") {
+      console.log(`Title: ${title} or Body: ${body} are empty`);
+      await snapshot.ref.update({ status: "failed", error: `Title: ${title} or Body: ${body} are empty` });
+      return;
+    }
+
+    const userRefs = userRefsStr === "" ? [] : userRefsStr.trim().split(",");
+    const tokens = new Set();
+    if (userRefsStr) {
+      for (const userRef of userRefs) {
+        const userTokens = await Ref
+            .db
+            .doc(userRef)
+            .collection("fcm_tokens")
+            .get();
+        userTokens.docs.forEach((token) => {
+          if (typeof token.data().fcm_token !== undefined) {
+            tokens.add(token.data().fcm_token);
+          }
+        });
+      }
+    } else {
+      // Handle batched push notifications by splitting tokens up by document
+      // id.
+      let userTokens: admin.firestore.QuerySnapshot<admin.firestore.DocumentData>;
+      if (numBatches > 0) {
+        userTokens = await Ref.tokenCollectionGroup
+            .orderBy(admin.firestore.FieldPath.documentId())
+            .startAt(this.getDocIdBound(batchIndex, numBatches))
+            .endBefore(this.getDocIdBound(batchIndex + 1, numBatches)).get();
+      } else {
+        userTokens = await Ref.tokenCollectionGroup.get();
+      }
+
+      userTokens.docs.forEach((token) => {
+        const data = token.data();
+        const audienceMatches =
+          targetAudience === "All" || data.device_type === targetAudience;
+        if (audienceMatches || typeof data.fcm_token !== undefined) {
+          tokens.add(data.fcm_token);
+        }
+      });
+    }
+
+    const tokensArr = Array.from(tokens);
+    const messageBatches = [];
+    for (let i = 0; i < tokensArr.length; i += 500) {
+      const tokensBatch = tokensArr.slice(i, Math.min(i + 500, tokensArr.length));
+      const messages = {
+        notification: {
+          title,
+          body,
+          ...(imageUrl && { imageUrl: imageUrl }),
+        },
+        data: {
+          initialPageName,
+          parameterData,
+        },
+        android: {
+          notification: {
+            ...(sound && { sound: sound }),
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              ...(sound && { sound: sound }),
+            },
+          },
+        },
+        tokens: tokensBatch,
+      };
+      messageBatches.push(messages);
+    }
+
+    let numSent = 0;
+    await Promise.all(
+        messageBatches.map(async (messages) => {
+          const response = await admin.messaging().sendMulticast(messages as MulticastMessage);
+          numSent += response.successCount;
+        })
+    );
+
+    await snapshot.ref.update({ status: "succeeded", num_sent: numSent });
+  }
+
+  static getDocIdBound(index: number, numBatches: number) {
+    if (index <= 0) {
+      return "users/(";
+    }
+    if (index >= numBatches) {
+      return "users/}";
+    }
+    const numUidChars = 62;
+    const twoCharOptions = Math.pow(numUidChars, 2);
+
+    const twoCharIdx = (index * twoCharOptions) / numBatches;
+    const firstCharIdx = Math.floor(twoCharIdx / numUidChars);
+    const secondCharIdx = Math.floor(twoCharIdx % numUidChars);
+    const firstChar = this.getCharForIndex(firstCharIdx);
+    const secondChar = this.getCharForIndex(secondCharIdx);
+    return "users/" + firstChar + secondChar;
+  }
+
+  static getCharForIndex(charIdx: number) {
+    if (charIdx < 10) {
+      return String.fromCharCode(charIdx + "0".charCodeAt(0));
+    } else if (charIdx < 36) {
+      return String.fromCharCode("A".charCodeAt(0) + charIdx - 10);
+    } else {
+      return String.fromCharCode("a".charCodeAt(0) + charIdx - 36);
+    }
   }
 }
