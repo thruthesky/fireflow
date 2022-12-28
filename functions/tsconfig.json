@@ -11,7 +11,9 @@
       // ... other libs
       "ES2021.String",
       "dom"
-    ]
+    ],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "compileOnSave": true,
   "include": ["src"]
