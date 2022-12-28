@@ -22,6 +22,8 @@
 - [Fireflow](#fireflow)
 - [TODO](#todo)
 - [개요](#개요)
+- [Installation](#installation)
+  - [For unit testing](#for-unit-testing)
 - [기능](#기능)
 - [커뮤니티 기능 플로우챠트](#커뮤니티-기능-플로우챠트)
 - [Firestore DB 구조](#firestore-db-구조)
@@ -80,6 +82,17 @@
   * Cloud function 의 Firestore background functions 에서는 `context.auth` 를 사용 할 수 없다. 그래서 항상 userDocumentReference 에서 글 쓴이 문서 ref 를 전달해 주어야 한다.
   * 또한 백엔드에서 업데이트하는 데이터(필드)는 한박자 늦을 수 있다. 그래서 `createdAt` 과 같이, 목록에서 정렬할 때 사용되는 변수는 처음 저장 할 때, 같이 저장 해 주어야 한다. (그렇지 않으면 목록에 바로 나오지 않을 수 있다.)
 
+
+
+# Installation
+
+- `keys` folder is ignored for uploading github.
+
+## For unit testing
+
+- add a `service account` in json under `keys` folder and apply it to `firebase.init.ts`.
+- add a json file named `keys.json` under `keys` folder.
+  - add `openAiKey` field with the value of `openAi API key`.
 
 
 
