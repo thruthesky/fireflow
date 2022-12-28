@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import { Configuration, OpenAIApi } from "openai";
-import { SystemConfig } from "../../src/system.config";
+import { SystemConfig } from "../system.config";
 import { GptDocument } from "../interfaces/gpt.interface";
 
 export class Gpt {
@@ -23,7 +23,7 @@ export class Gpt {
             temperature: data.temperature,
           },
           {
-            timeout: 30000,
+            timeout: 60000,
           }
       );
       console.log(completion.data.choices[0].text);
@@ -31,14 +31,19 @@ export class Gpt {
         result: "success",
         queryStartedAt: queryStartedAt,
         queryFinishedAt: admin.firestore.FieldValue.serverTimestamp(),
-        ...completion.data,
+        ...completion.data.choices[0],
+        ...completion.data.usage,
+        id: completion.data.id,
+        object: completion.data.object,
+        created: completion.data.created,
       });
     } catch (error: any) {
       let message = "";
       if (error.response) {
-        console.log(error.response.status);
-        console.log(error.response.data);
-        message = `${error.response.status} ${error.response.data}`;
+        // console.log(error.response.status);
+        // console.log(error.response.data);
+        const obj = JSON.stringify(error.response.data);
+        message = `error response; status: ${error.response.status} error data: ${obj}`;
       } else {
         console.log(error.message);
         message = error.message;

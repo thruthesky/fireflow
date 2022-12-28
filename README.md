@@ -455,10 +455,21 @@ erDiagram
 
 ## GPT query
 
-- `model` can be one of [GPT-3 Latest Models](https://beta.openai.com/docs/models/gpt-3)
-- `temperature` can be between 0 ~ 1. For moderate response, use `0 ~ 0.5`. For more experiment but may not be accurate, use `0.6 ~ 1`.
-- `max_tokens` can be any number. But for a better result, it should be bigger than 256. See [Best practices](https://beta.openai.com/docs/guides/code/best-practices) for the reference.
-- `prompt` is the question string.
+- The clinet application can save the fields below.
+  - `userDocumentReference` is the user's reference.
+  - `model` can be one of [GPT-3 Latest Models](https://beta.openai.com/docs/models/gpt-3)
+  - `temperature` can be between 0 ~ 1. For moderate response, use `0 ~ 0.5`. For more experiment but may not be accurate, use `0.6 ~ 1`.
+  - `max_tokens` can be any number. But for a better result, it should be bigger than 256. See [Best practices](https://beta.openai.com/docs/guides/code/best-practices) for the reference.
+  - `prompt` is the question string.
+  - `createdAt` is the Timestamp (`Current time` in `Flutterflow`) saved by the client app. This is because when the client app displays the document of quries immediately after creating the query document(before the reponse), it needs a field to order by.
+
+- When the query succeeds and there is no error, `result` becomes `success` and all ohter variables except `message` filled in.
+
+- When there is an error, `result` becomes `failure` and the `message` has the error message.
+
+- `created` is the time coming from the api.
+- `queryStartedAt` is the time that the backend funtion triggers the query.
+- `queryFinishedAt` is the time that the backend funtion finished the query.
 
 
 # 보안
