@@ -57,6 +57,8 @@
   - [Chat push notification](#chat-push-notification)
 - [Storage and Uploads](#storage-and-uploads)
   - [Reference to the object](#reference-to-the-object)
+- [GPT](#gpt)
+  - [GPT query](#gpt-query)
 - [보안](#보안)
 - [Test codes](#test-codes)
   - [lab folder](#lab-folder)
@@ -444,6 +446,19 @@ erDiagram
   - `documentId` - The document ID of `targetReferencePath`
   - `type` - is the type of the uploaded image. It can be `profilePhoto` or `coverPhoto`.
   
+
+# GPT
+
+- Fireflow provides an experimental feature of supporting GPT-3 completion API.
+- See the official document of [Open Ai](https://beta.openai.com/docs/introduction).
+- See the official document of [Completions](https://beta.openai.com/docs/api-reference/completions/create).
+
+## GPT query
+
+- `model` can be one of [GPT-3 Latest Models](https://beta.openai.com/docs/models/gpt-3)
+- `temperature` can be between 0 ~ 1. For moderate response, use `0 ~ 0.5`. For more experiment but may not be accurate, use `0.6 ~ 1`.
+- `max_tokens` can be any number. But for a better result, it should be bigger than 256. See [Best practices](https://beta.openai.com/docs/guides/code/best-practices) for the reference.
+- `prompt` is the question string.
 
 
 # 보안

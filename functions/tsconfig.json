@@ -9,11 +9,10 @@
     "target": "es2017",
     "lib": [
       // ... other libs
-      "ES2021.String"
+      "ES2021.String",
+      "dom"
     ]
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
